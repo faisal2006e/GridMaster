@@ -91,7 +91,7 @@ export const GridBody: React.FC<GridBodyProps> = ({
     return (
       <tbody>
         <tr>
-          <td colSpan={visibleColumns.length + (showColumnChooser ? 1 : 0)} style={{ padding: 0 }}>
+          <td colSpan={visibleColumns.length} style={{ padding: 0 }}>
             <div className="grid-empty-state">
               <div className="grid-empty-state-icon">📊</div>
               <div className="grid-empty-state-title">No Data Found</div>
@@ -109,9 +109,6 @@ export const GridBody: React.FC<GridBodyProps> = ({
     <tbody>
       {data.map((row, index) => (
         <tr key={row.id || index} className="grid-row">
-          {showColumnChooser && (
-            <td className="grid-cell column-chooser-cell"></td>
-          )}
           {visibleColumns.map(column => (
             <td key={column.field} className="grid-cell">
               {renderCell(row, column)}

@@ -81,44 +81,6 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   return (
     <thead>
       <tr>
-        {showColumnChooser && (
-          <th className="grid-header-cell column-chooser-header">
-            <div className="column-chooser-container">
-              <button 
-                className="column-chooser-button"
-                onClick={() => setShowColumnDropdown(!showColumnDropdown)}
-                title="Choose Columns"
-              >
-                ☰
-              </button>
-              {showColumnDropdown && (
-                <div className="column-chooser-dropdown">
-                  <div className="column-chooser-dropdown-header">
-                    <span>Choose Columns</span>
-                    <button 
-                      className="dropdown-close-button"
-                      onClick={() => setShowColumnDropdown(false)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <div className="column-chooser-dropdown-list">
-                    {columns.map(column => (
-                      <label key={column.field} className="column-dropdown-item">
-                        <input
-                          type="checkbox"
-                          checked={column.visible !== false}
-                          onChange={() => handleColumnVisibilityToggle(column.field)}
-                        />
-                        <span>{column.headerName}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </th>
-        )}
         {visibleColumns.map(column => (
           <th 
             key={column.field} 
