@@ -85,24 +85,6 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                   </div>
                 )}
               </div>
-              
-              {column.filterable && filterConfig[column.field]?.value && (
-                <div className="active-filter-indicator">
-                  <span className="filter-operator-label">
-                    {filterConfig[column.field].operator}
-                  </span>
-                  <span className="filter-value-label">
-                    "{filterConfig[column.field].value}"
-                  </span>
-                  <button
-                    className="clear-filter-button"
-                    onClick={() => onFilter(column.field, '', 'contains')}
-                    title="Clear filter"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
             </div>
           </th>
         ))}
