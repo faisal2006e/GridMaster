@@ -14,8 +14,10 @@
 
 
 
-./ScreenShots/1.png
-./ScreenShots/2.png
+![Grid Library Demo](https://github.com/faisal2006e/GridMaster/blob/main/Screenshots/1.PNG)
+
+![Grid Library Demo](https://github.com/faisal2006e/GridMaster/blob/main/Screenshots/2.PNG)
+
 ./ScreenShots/3.png
 ./ScreenShots/ColumnChosser.png
 ./ScreenShots/ColumnChosser2.png
