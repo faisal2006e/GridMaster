@@ -201,22 +201,21 @@
 .resize-handle {
   position: absolute;
   top: 0;
-  right: -2px;
-  width: 4px;
+  right: -3px;
+  width: 6px;
   height: 100%;
   cursor: col-resize;
   background: transparent;
-  border-right: 2px solid transparent;
-  transition: border-color 0.2s ease;
-  z-index: 10;
+  z-index: 15;
 }
 
 .resize-handle:hover {
-  border-right-color: #007bff;
+  background: rgba(0, 123, 255, 0.2);
+  border-right: 2px solid #007bff;
 }
 
 .grid-header-cell:hover .resize-handle {
-  border-right-color: #007bff;
+  background: rgba(0, 123, 255, 0.1);
 }
 
 .header-content {

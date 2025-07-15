@@ -106,11 +106,9 @@ const DraggableHeaderCell: React.FC<{
     setStartWidth(column.width || 150);
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (isResizing) {
-        const diff = e.clientX - startX;
-        const newWidth = Math.max(50, startWidth + diff);
-        onColumnResize(column.field, newWidth);
-      }
+      const diff = e.clientX - startX;
+      const newWidth = Math.max(50, startWidth + diff);
+      onColumnResize(column.field, newWidth);
     };
 
     const handleMouseUp = () => {
