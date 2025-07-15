@@ -12,10 +12,11 @@
 - **Customizable Cells**: Render custom content in any cell with ease.
 - **Rich API**: Easily extend and integrate with your application using a powerful and flexible API.
 
-## Installation
 
-You can install **GridMaster** via npm or yarn.
 
-Using npm:
-```bash
-npm install gridmaster
+./ScreenShots/1.png
+./ScreenShots/2.png
+./ScreenShots/3.png
+./ScreenShots/ColumnChosser.png
+./ScreenShots/ColumnChosser2.png
+./ScreenShots/Grouping.png
