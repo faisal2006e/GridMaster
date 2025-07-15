@@ -254,8 +254,29 @@ export const Grid: React.FC<GridProps> = ({
             }
           }}
         >
-          <span className="drag-icon">☰</span>
-          <span className="drag-text">Drag here to set row groups</span>
+          {groupByColumns.length === 0 ? (
+            <>
+              <span className="drag-icon">☰</span>
+              <span className="drag-text">Drag here to set row groups</span>
+            </>
+          ) : (
+            <div className="drag-area-groups">
+              <span className="drag-icon">☰</span>
+              <span className="drag-text">Row groups:</span>
+              {groupByColumns.map(col => (
+                <div key={col.field} className="drag-area-group-tag">
+                  <span>{col.headerName}</span>
+                  <button 
+                    className="drag-area-group-remove"
+                    onClick={() => handleRemoveGroupBy(col.field)}
+                    title={`Remove ${col.headerName} grouping`}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <table className="grid-table">
           <GridHeader
