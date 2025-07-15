@@ -1,5 +1,6 @@
-
 import React, { useState } from 'react';
+import { useDrag, useDrop, DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Column, SortConfig, FilterConfig, FilterOperator } from '../types/grid';
 import { FilterDropdown } from './FilterDropdown';
 
@@ -15,6 +16,69 @@ interface GridHeaderProps {
   setColumns?: (columns: Column[] | ((prev: Column[]) => Column[])) => void;
   showColumnChooser?: boolean;
 }
+
+interface DragItem {
+  type: string;
+  field: string;
+  index: number;
+}
+
+const COLUMN_TYPE = 'column';
+
+const DraggableHeaderCell: React.FC<{
+  column: Column;
+  index: number;
+  moveColumn: (fromIndex: number, toIndex: number) => void;
+  children: React.ReactNode;
+}> = ({ column, index, moveColumn, children }) => {
+  const [{ isDragging }, drag, preview] = useDrag({
+    type: COLUMN_TYPE,
+    item: { type: COLUMN_TYPE, field: column.field, index },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  const [{ isOver }, drop] = useDrop({
+    accept: COLUMN_TYPE,
+    drop: (item: DragItem) => {
+      if (item.index !== index) {
+        moveColumn(item.index, index);
+      }
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+    }),
+  });
+
+  return (
+    <th
+      ref={(node) => {
+        preview(node);
+        drop(node);
+      }}
+      style={{ 
+        width: column.width,
+        opacity: isDragging ? 0.5 : 1,
+        backgroundColor: isOver ? '#e3f2fd' : undefined,
+        borderLeft: isOver ? '3px solid #007bff' : undefined,
+      }}
+      className={`grid-header-cell ${isOver ? 'drag-over' : ''} ${isDragging ? 'dragging' : ''}`}
+    >
+      <div className="header-content">
+        <span 
+          ref={drag}
+          className="drag-handle" 
+          title="Drag to reorder column"
+          style={{ cursor: 'grab' }}
+        >
+          ⋮⋮
+        </span>
+        {children}
+      </div>
+    </th>
+  );
+};
 
 export const GridHeader: React.FC<GridHeaderProps> = ({
   columns,
@@ -34,8 +98,6 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   const [columnMenuPosition, setColumnMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [threeDotsMenuField, setThreeDotsMenuField] = useState<string | null>(null);
   const [threeDotsMenuPosition, setThreeDotsMenuPosition] = useState<{ x: number; y: number } | null>(null);
-  const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
-  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
 
   const getSortIcon = (field: string) => {
     if (sortConfig?.field !== field) return '↑↓';
@@ -43,6 +105,17 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   const visibleColumns = columns.filter(column => column.visible !== false);
+
+  const moveColumn = (fromIndex: number, toIndex: number) => {
+    if (setColumns) {
+      setColumns(prevColumns => {
+        const newColumns = [...prevColumns];
+        const [movedColumn] = newColumns.splice(fromIndex, 1);
+        newColumns.splice(toIndex, 0, movedColumn);
+        return newColumns;
+      });
+    }
+  };
 
   const handleColumnVisibilityToggle = (field: string) => {
     const column = columns.find(col => col.field === field);
@@ -111,39 +184,32 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
 
   const handleAutosizeColumn = () => {
     if (threeDotsMenuField && onColumnVisibilityChange) {
-      // Calculate content width for the specific column
       const columnIndex = columns.findIndex(col => col.field === threeDotsMenuField);
       if (columnIndex !== -1) {
-        // Create a temporary element to measure text width
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         if (context) {
-          context.font = '14px Arial'; // Default font
-          
-          // Get all cell values for this column from the DOM
+          context.font = '14px Arial';
+
           const cells = document.querySelectorAll(`table.grid-table td:nth-child(${columnIndex + 1})`);
           const headerCell = document.querySelector(`table.grid-table th:nth-child(${columnIndex + 1})`);
-          
-          let maxWidth = 100; // Minimum width
-          
-          // Measure header text
+
+          let maxWidth = 100;
+
           if (headerCell) {
             const headerText = columns[columnIndex].headerName;
-            const headerWidth = context.measureText(headerText).width + 60; // Add padding for sort icons
+            const headerWidth = context.measureText(headerText).width + 60;
             maxWidth = Math.max(maxWidth, headerWidth);
           }
-          
-          // Measure cell content
+
           cells.forEach(cell => {
             const cellText = cell.textContent || '';
-            const cellWidth = context.measureText(cellText).width + 24; // Add padding
+            const cellWidth = context.measureText(cellText).width + 24;
             maxWidth = Math.max(maxWidth, cellWidth);
           });
-          
-          // Cap the maximum width to prevent extremely wide columns
+
           maxWidth = Math.min(maxWidth, 400);
-          
-          // Update the column width
+
           setColumns(prev => 
             prev.map(col => 
               col.field === threeDotsMenuField 
@@ -159,39 +225,34 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
 
   const handleAutosizeAllColumns = () => {
     if (onColumnVisibilityChange) {
-      // Create a temporary element to measure text width
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       if (context) {
-        context.font = '14px Arial'; // Default font
-        
+        context.font = '14px Arial';
+
         const updatedColumns = columns.map((column, columnIndex) => {
-          // Get all cell values for this column from the DOM
           const cells = document.querySelectorAll(`table.grid-table td:nth-child(${columnIndex + 1})`);
           const headerCell = document.querySelector(`table.grid-table th:nth-child(${columnIndex + 1})`);
-          
-          let maxWidth = 100; // Minimum width
-          
-          // Measure header text
+
+          let maxWidth = 100;
+
           if (headerCell) {
             const headerText = column.headerName;
-            const headerWidth = context.measureText(headerText).width + 60; // Add padding for sort icons
+            const headerWidth = context.measureText(headerText).width + 60;
             maxWidth = Math.max(maxWidth, headerWidth);
           }
-          
-          // Measure cell content
+
           cells.forEach(cell => {
             const cellText = cell.textContent || '';
-            const cellWidth = context.measureText(cellText).width + 24; // Add padding
+            const cellWidth = context.measureText(cellText).width + 24;
             maxWidth = Math.max(maxWidth, cellWidth);
           });
-          
-          // Cap the maximum width to prevent extremely wide columns
+
           maxWidth = Math.min(maxWidth, 400);
-          
+
           return { ...column, width: Math.ceil(maxWidth) };
         });
-        
+
         setColumns(updatedColumns);
       }
     }
@@ -199,14 +260,12 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   const handlePinColumn = () => {
-    // Placeholder for pin column functionality
     console.log('Pin column:', threeDotsMenuField);
     handleThreeDotsMenuClose();
   };
 
   const handleGroupByColumn = () => {
     if (threeDotsMenuField) {
-      // Find the column and add it to group by
       const column = columns.find(col => col.field === threeDotsMenuField);
       if (column) {
         const event = new CustomEvent('groupByColumn', { 
@@ -219,7 +278,6 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   const handleResetColumns = () => {
-    // Reset all columns to visible
     columns.forEach(column => {
       if (onColumnVisibilityChange) {
         onColumnVisibilityChange(column.field, true);
@@ -228,162 +286,28 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     handleThreeDotsMenuClose();
   };
 
-  const handleDragStart = (e: React.DragEvent, field: string) => {
-    console.log('Drag start for field:', field);
-    
-    // Prevent default to ensure drag works
-    e.stopPropagation();
-    
-    setDraggedColumn(field);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', field);
-    e.dataTransfer.setData('application/x-column-field', field);
-    
-    // Create a custom drag image
-    const dragImage = document.createElement('div');
-    dragImage.innerHTML = columns.find(col => col.field === field)?.headerName || field;
-    dragImage.style.padding = '8px 12px';
-    dragImage.style.background = '#007bff';
-    dragImage.style.color = 'white';
-    dragImage.style.borderRadius = '4px';
-    dragImage.style.fontSize = '14px';
-    dragImage.style.position = 'absolute';
-    dragImage.style.top = '-1000px';
-    dragImage.style.left = '-1000px';
-    dragImage.style.pointerEvents = 'none';
-    dragImage.style.zIndex = '9999';
-    document.body.appendChild(dragImage);
-    
-    // Use requestAnimationFrame to ensure the element is rendered before setting drag image
-    requestAnimationFrame(() => {
-      e.dataTransfer.setDragImage(dragImage, 50, 20);
-    });
-    
-    // Clean up drag image after a short delay
-    setTimeout(() => {
-      if (document.body.contains(dragImage)) {
-        document.body.removeChild(dragImage);
-      }
-    }, 200);
-
-    // Add class to grid container for outside drop zone styling
-    const gridContainer = document.querySelector('.grid-container');
-    if (gridContainer) {
-      gridContainer.classList.add('drag-outside');
-    }
-  };
-
-  const handleDragEnd = (e: React.DragEvent) => {
-    setDraggedColumn(null);
-    setDragOverColumn(null);
-
-    // Remove class from grid container
-    const gridContainer = document.querySelector('.grid-container');
-    if (gridContainer) {
-      gridContainer.classList.remove('drag-outside');
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent, field: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.dropEffect = 'move';
-    
-    // Only set drag over if we're dragging a different column
-    if (draggedColumn && draggedColumn !== field) {
-      setDragOverColumn(field);
-    }
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.stopPropagation();
-    // Only clear drag over if we're leaving the entire header cell
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = e.clientX;
-    const y = e.clientY;
-    
-    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-      setDragOverColumn(null);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent, targetField: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Try to get dragged field from multiple data formats
-    const draggedField = e.dataTransfer.getData('application/x-column-field') || 
-                         e.dataTransfer.getData('text/plain') || 
-                         draggedColumn;
-    
-    console.log('Drop event - dragged:', draggedField, 'target:', targetField);
-    
-    if (draggedField === targetField || !setColumns || !draggedField) {
-      setDraggedColumn(null);
-      setDragOverColumn(null);
-      return;
-    }
-
-    // Reorder columns
-    if (setColumns) {
-      setColumns(prevColumns => {
-        const draggedIndex = prevColumns.findIndex(col => col.field === draggedField);
-        const targetIndex = prevColumns.findIndex(col => col.field === targetField);
-        
-        if (draggedIndex === -1 || targetIndex === -1) return prevColumns;
-        
-        const newColumns = [...prevColumns];
-        const [draggedColumnObj] = newColumns.splice(draggedIndex, 1);
-        
-        // Insert at the correct position based on drop position
-        newColumns.splice(targetIndex, 0, draggedColumnObj);
-        
-        return newColumns;
-      });
-    }
-    
-    setDraggedColumn(null);
-    setDragOverColumn(null);
-  };
-
   return (
-    <thead>
-      <tr>
-        {visibleColumns.map(column => (
-          <th 
-            key={column.field} 
-            style={{ width: column.width }}
-            className={`grid-header-cell ${dragOverColumn === column.field ? 'drag-over' : ''} ${draggedColumn === column.field ? 'dragging' : ''}`}
-            onContextMenu={(e) => handleColumnRightClick(e, column.field)}
-            onDragOver={(e) => handleDragOver(e, column.field)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, column.field)}
-          >
-            <div className="header-content">
-              <span 
-                className="drag-handle" 
-                title="Drag to reorder column"
-                draggable={true}
-                onDragStart={(e) => handleDragStart(e, column.field)}
-                onDragEnd={(e) => handleDragEnd(e)}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
-                onSelectStart={(e) => e.preventDefault()}
-              >
-                ⋮⋮
-              </span>
+    <DndProvider backend={HTML5Backend}>
+      <thead>
+        <tr>
+          {visibleColumns.map((column, index) => (
+            <DraggableHeaderCell
+              key={column.field}
+              column={column}
+              index={index}
+              moveColumn={moveColumn}
+            >
               <span 
                 className={`header-title ${column.sortable ? 'sortable' : ''}`}
                 onClick={() => column.sortable && onSort(column.field)}
+                onContextMenu={(e) => handleColumnRightClick(e, column.field)}
               >
                 {column.headerName}
                 {column.sortable && (
                   <span className="sort-icon">{getSortIcon(column.field)}</span>
                 )}
               </span>
-              
+
               {column.filterable && (
                 <div className="filter-controls">
                   <button
@@ -403,145 +327,145 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                   )}
                 </div>
               )}
-            </div>
-          </th>
-        ))}
-      </tr>
-      
-      {/* Column Context Menu */}
-      {columnMenuField && columnMenuPosition && (
-        <div className="column-context-menu-overlay" onClick={handleColumnMenuClose}>
-          <div 
-            className="column-context-menu"
-            style={{ 
-              left: columnMenuPosition.x, 
-              top: columnMenuPosition.y 
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="column-menu-item" onClick={handleSortAscending}>
-              <span className="column-menu-icon">↑</span>
-              <span>Sort Ascending</span>
-            </div>
-            <div className="column-menu-item" onClick={handleClearSort}>
-              <span className="column-menu-icon">◇</span>
-              <span>Clear Sort</span>
-            </div>
-            <div className="column-menu-divider"></div>
-            <div className="column-menu-item" onClick={handleColumnChooserFromMenu}>
-              <span className="column-menu-icon">☰</span>
-              <span>Choose Columns</span>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {/* Three Dots Menu */}
-      {threeDotsMenuField && threeDotsMenuPosition && (
-        <div className="column-context-menu-overlay" onClick={handleThreeDotsMenuClose}>
-          <div 
-            className="three-dots-context-menu"
-            style={{ 
-              left: threeDotsMenuPosition.x, 
-              top: threeDotsMenuPosition.y 
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="column-menu-item" onClick={() => {
-              onSort(threeDotsMenuField);
-              if (setSortConfig) {
-                setSortConfig({ field: threeDotsMenuField, direction: 'asc' });
-              }
-              handleThreeDotsMenuClose();
-            }}>
-              <span className="column-menu-icon">↑</span>
-              <span>Sort Ascending</span>
-            </div>
-            <div className="column-menu-item" onClick={handleSortDescending}>
-              <span className="column-menu-icon">↓</span>
-              <span>Sort Descending</span>
-            </div>
-            <div className="column-menu-item" onClick={() => {
-              if (setSortConfig) {
-                setSortConfig(null);
-              }
-              handleThreeDotsMenuClose();
-            }}>
-              <span className="column-menu-icon">◇</span>
-              <span>Clear Sort</span>
-            </div>
-            <div className="column-menu-divider"></div>
-            <div className="column-menu-item" onClick={() => {
-              setActiveFilterDropdown(threeDotsMenuField);
-              handleThreeDotsMenuClose();
-            }}>
-              <span className="column-menu-icon">🔍</span>
-              <span>Filter</span>
-            </div>
-            <div className="column-menu-divider"></div>
-            <div className="column-menu-item" onClick={handlePinColumn}>
-              <span className="column-menu-icon">📌</span>
-              <span>Pin Column</span>
-              <span className="column-menu-arrow">▶</span>
-            </div>
-            <div className="column-menu-divider"></div>
-            <div className="column-menu-item" onClick={handleAutosizeColumn}>
-              <span className="column-menu-icon">↔</span>
-              <span>Autosize This Column</span>
-            </div>
-            <div className="column-menu-item" onClick={handleAutosizeAllColumns}>
-              <span className="column-menu-icon">↔</span>
-              <span>Autosize All Columns</span>
-            </div>
-            <div className="column-menu-divider"></div>
-            <div className="column-menu-item" onClick={handleGroupByColumn}>
-              <span className="column-menu-icon">≡</span>
-              <span>Group by {threeDotsMenuField ? columns.find(col => col.field === threeDotsMenuField)?.headerName : 'Column'}</span>
-            </div>
-            <div className="column-menu-divider"></div>
-            <div className="column-menu-item" onClick={() => {
-              setShowColumnDropdown(true);
-              handleThreeDotsMenuClose();
-            }}>
-              <span className="column-menu-icon">☰</span>
-              <span>Choose Columns</span>
-            </div>
-            <div className="column-menu-item" onClick={handleResetColumns}>
-              <span className="column-menu-icon">↺</span>
-              <span>Reset Columns</span>
-            </div>
-          </div>
-        </div>
-      )}
+            </DraggableHeaderCell>
+          ))}
+        </tr>
 
-      {/* Column Chooser Dropdown */}
-      {showColumnDropdown && (
-        <div className="column-chooser-overlay" onClick={() => setShowColumnDropdown(false)}>
-          <div className="column-chooser-dropdown-standalone" onClick={(e) => e.stopPropagation()}>
-            <div className="column-chooser-dropdown-header">
-              <span>Choose Columns</span>
-              <button 
-                className="dropdown-close-button"
-                onClick={() => setShowColumnDropdown(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="column-chooser-dropdown-list">
-              {columns.map(column => (
-                <label key={column.field} className="column-dropdown-item">
-                  <input
-                    type="checkbox"
-                    checked={column.visible !== false}
-                    onChange={() => handleColumnVisibilityToggle(column.field)}
-                  />
-                  <span>{column.headerName}</span>
-                </label>
-              ))}
+        {/* Column Context Menu */}
+        {columnMenuField && columnMenuPosition && (
+          <div className="column-context-menu-overlay" onClick={handleColumnMenuClose}>
+            <div 
+              className="column-context-menu"
+              style={{ 
+                left: columnMenuPosition.x, 
+                top: columnMenuPosition.y 
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="column-menu-item" onClick={handleSortAscending}>
+                <span className="column-menu-icon">↑</span>
+                <span>Sort Ascending</span>
+              </div>
+              <div className="column-menu-item" onClick={handleClearSort}>
+                <span className="column-menu-icon">◇</span>
+                <span>Clear Sort</span>
+              </div>
+              <div className="column-menu-divider"></div>
+              <div className="column-menu-item" onClick={handleColumnChooserFromMenu}>
+                <span className="column-menu-icon">☰</span>
+                <span>Choose Columns</span>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </thead>
+        )}
+
+        {/* Three Dots Menu */}
+        {threeDotsMenuField && threeDotsMenuPosition && (
+          <div className="column-context-menu-overlay" onClick={handleThreeDotsMenuClose}>
+            <div 
+              className="three-dots-context-menu"
+              style={{ 
+                left: threeDotsMenuPosition.x, 
+                top: threeDotsMenuPosition.y 
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="column-menu-item" onClick={() => {
+                onSort(threeDotsMenuField);
+                if (setSortConfig) {
+                  setSortConfig({ field: threeDotsMenuField, direction: 'asc' });
+                }
+                handleThreeDotsMenuClose();
+              }}>
+                <span className="column-menu-icon">↑</span>
+                <span>Sort Ascending</span>
+              </div>
+              <div className="column-menu-item" onClick={handleSortDescending}>
+                <span className="column-menu-icon">↓</span>
+                <span>Sort Descending</span>
+              </div>
+              <div className="column-menu-item" onClick={() => {
+                if (setSortConfig) {
+                  setSortConfig(null);
+                }
+                handleThreeDotsMenuClose();
+              }}>
+                <span className="column-menu-icon">◇</span>
+                <span>Clear Sort</span>
+              </div>
+              <div className="column-menu-divider"></div>
+              <div className="column-menu-item" onClick={() => {
+                setActiveFilterDropdown(threeDotsMenuField);
+                handleThreeDotsMenuClose();
+              }}>
+                <span className="column-menu-icon">🔍</span>
+                <span>Filter</span>
+              </div>
+              <div className="column-menu-divider"></div>
+              <div className="column-menu-item" onClick={handlePinColumn}>
+                <span className="column-menu-icon">📌</span>
+                <span>Pin Column</span>
+                <span className="column-menu-arrow">▶</span>
+              </div>
+              <div className="column-menu-divider"></div>
+              <div className="column-menu-item" onClick={handleAutosizeColumn}>
+                <span className="column-menu-icon">↔</span>
+                <span>Autosize This Column</span>
+              </div>
+              <div className="column-menu-item" onClick={handleAutosizeAllColumns}>
+                <span className="column-menu-icon">↔</span>
+                <span>Autosize All Columns</span>
+              </div>
+              <div className="column-menu-divider"></div>
+              <div className="column-menu-item" onClick={handleGroupByColumn}>
+                <span className="column-menu-icon">≡</span>
+                <span>Group by {threeDotsMenuField ? columns.find(col => col.field === threeDotsMenuField)?.headerName : 'Column'}</span>
+              </div>
+              <div className="column-menu-divider"></div>
+              <div className="column-menu-item" onClick={() => {
+                setShowColumnDropdown(true);
+                handleThreeDotsMenuClose();
+              }}>
+                <span className="column-menu-icon">☰</span>
+                <span>Choose Columns</span>
+              </div>
+              <div className="column-menu-item" onClick={handleResetColumns}>
+                <span className="column-menu-icon">↺</span>
+                <span>Reset Columns</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Column Chooser Dropdown */}
+        {showColumnDropdown && (
+          <div className="column-chooser-overlay" onClick={() => setShowColumnDropdown(false)}>
+            <div className="column-chooser-dropdown-standalone" onClick={(e) => e.stopPropagation()}>
+              <div className="column-chooser-dropdown-header">
+                <span>Choose Columns</span>
+                <button 
+                  className="dropdown-close-button"
+                  onClick={() => setShowColumnDropdown(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="column-chooser-dropdown-list">
+                {columns.map(column => (
+                  <label key={column.field} className="column-dropdown-item">
+                    <input
+                      type="checkbox"
+                      checked={column.visible !== false}
+                      onChange={() => handleColumnVisibilityToggle(column.field)}
+                    />
+                    <span>{column.headerName}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </thead>
+    </DndProvider>
   );
 };
