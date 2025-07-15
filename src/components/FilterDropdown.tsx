@@ -139,15 +139,14 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                   className="filter-value-input"
                 />
                 
-                {conditions.length > 1 && (
-                  <button 
-                    className="remove-condition-button"
-                    onClick={() => removeCondition(condition.id)}
-                    title="Remove condition"
-                  >
-                    ×
-                  </button>
-                )}
+                <button 
+                  className="remove-condition-button"
+                  onClick={() => removeCondition(condition.id)}
+                  title="Remove condition"
+                  disabled={conditions.length === 1}
+                >
+                  ×
+                </button>
               </div>
             </div>
           ))}
