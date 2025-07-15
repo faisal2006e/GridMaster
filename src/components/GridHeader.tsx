@@ -203,8 +203,13 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   const handleGroupByColumn = () => {
-    // Placeholder for group by functionality
-    console.log('Group by column:', threeDotsMenuField);
+    if (threeDotsMenuField && onFilter) {
+      // Add this column to group by
+      const event = new CustomEvent('groupByColumn', { 
+        detail: { field: threeDotsMenuField, headerName: columns.find(col => col.field === threeDotsMenuField)?.headerName }
+      });
+      window.dispatchEvent(event);
+    }
     handleThreeDotsMenuClose();
   };
 
@@ -353,7 +358,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
             <div className="column-menu-divider"></div>
             <div className="column-menu-item" onClick={handleGroupByColumn}>
               <span className="column-menu-icon">≡</span>
-              <span>Group by Total Value</span>
+              <span>Group by {threeDotsMenuField ? columns.find(col => col.field === threeDotsMenuField)?.headerName : 'Column'}</span>
             </div>
             <div className="column-menu-divider"></div>
             <div className="column-menu-item" onClick={() => {

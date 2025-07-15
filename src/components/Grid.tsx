@@ -21,6 +21,24 @@ export const Grid: React.FC<GridProps> = ({
   const [filterConfig, setFilterConfig] = useState<FilterConfig>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [showColumnChooser, setShowColumnChooser] = useState(false);
+  const [groupByColumns, setGroupByColumns] = useState<Array<{field: string, headerName: string}>>([]);
+
+  // Listen for group by events
+  React.useEffect(() => {
+    const handleGroupByColumn = (event: CustomEvent) => {
+      const { field, headerName } = event.detail;
+      setGroupByColumns(prev => {
+        // Check if column is already grouped
+        if (prev.some(col => col.field === field)) {
+          return prev;
+        }
+        return [...prev, { field, headerName }];
+      });
+    };
+
+    window.addEventListener('groupByColumn', handleGroupByColumn as EventListener);
+    return () => window.removeEventListener('groupByColumn', handleGroupByColumn as EventListener);
+  }, []);
 
   const filteredData = useMemo(() => {
     return data.filter(row => {
@@ -54,10 +72,43 @@ export const Grid: React.FC<GridProps> = ({
     });
   }, [data, filterConfig]);
 
-  const sortedData = useMemo(() => {
-    if (!sortConfig) return filteredData;
+  const groupedData = useMemo(() => {
+    if (groupByColumns.length === 0) return filteredData;
+
+    const groups: { [key: string]: any[] } = {};
     
-    return [...filteredData].sort((a, b) => {
+    filteredData.forEach(row => {
+      const groupKey = groupByColumns.map(col => row[col.field] || 'Unknown').join(' | ');
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(row);
+    });
+
+    const result: any[] = [];
+    Object.entries(groups).forEach(([groupKey, groupRows]) => {
+      // Add group header row
+      result.push({
+        __isGroupHeader: true,
+        __groupKey: groupKey,
+        __groupCount: groupRows.length,
+        __groupColumns: groupByColumns,
+        __expanded: true
+      });
+      // Add group rows
+      result.push(...groupRows);
+    });
+
+    return result;
+  }, [filteredData, groupByColumns]);
+
+  const sortedData = useMemo(() => {
+    if (!sortConfig) return groupedData;
+    
+    return [...groupedData].sort((a, b) => {
+      // Don't sort group headers
+      if (a.__isGroupHeader || b.__isGroupHeader) return 0;
+      
       const aValue = a[sortConfig.field];
       const bValue = b[sortConfig.field];
       
@@ -65,7 +116,7 @@ export const Grid: React.FC<GridProps> = ({
       if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [filteredData, sortConfig]);
+  }, [groupedData, sortConfig]);
 
   const paginatedData = useMemo(() => {
     if (!pagination) return sortedData;
@@ -102,10 +153,45 @@ export const Grid: React.FC<GridProps> = ({
     );
   };
 
+  const handleRemoveGroupBy = (field: string) => {
+    setGroupByColumns(prev => prev.filter(col => col.field !== field));
+  };
+
   const totalPages = Math.ceil(sortedData.length / pageSize);
+
+  // GroupByRow component
+  const GroupByRow = () => {
+    if (groupByColumns.length === 0) return null;
+
+    return (
+      <div className="group-by-row">
+        <span className="group-by-label">Grouped by:</span>
+        {groupByColumns.map(col => (
+          <div key={col.field} className="group-by-tag">
+            <span>{col.headerName}</span>
+            <button 
+              className="group-by-remove"
+              onClick={() => handleRemoveGroupBy(col.field)}
+              title={`Remove ${col.headerName} grouping`}
+            >
+              ×
+            </button>
+          </div>
+        ))}
+        <button 
+          className="group-by-clear-all"
+          onClick={() => setGroupByColumns([])}
+          title="Clear all grouping"
+        >
+          Clear All
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="grid-container">
+      <GroupByRow />
       <div className="grid-wrapper">
         <table className="grid-table">
           <GridHeader

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Column } from '../types/grid';
 
@@ -22,19 +21,19 @@ export const GridBody: React.FC<GridBodyProps> = ({
 
   const handleCellDoubleClick = (rowId: any, field: string, currentValue: any) => {
     if (!editable) return;
-    
+
     setEditingCell({ rowId, field });
     setEditValue(currentValue?.toString() || '');
   };
 
   const handleCellSave = (row: any) => {
     if (!editingCell || !onRowUpdate) return;
-    
+
     const updatedRow = {
       ...row,
       [editingCell.field]: editValue
     };
-    
+
     onRowUpdate(updatedRow);
     setEditingCell(null);
     setEditValue('');
@@ -54,9 +53,14 @@ export const GridBody: React.FC<GridBodyProps> = ({
   };
 
   const renderCell = (row: any, column: Column) => {
+    // Handle group header rows
+    if (row.__isGroupHeader) {
+      return null; // Group headers are handled separately
+    }
+
+    const value = row[column.field];
     const isEditing = editingCell?.rowId === row.id && editingCell?.field === column.field;
-    const cellValue = row[column.field];
-    
+
     if (isEditing) {
       return (
         <input
@@ -65,20 +69,18 @@ export const GridBody: React.FC<GridBodyProps> = ({
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={() => handleCellSave(row)}
           onKeyDown={(e) => handleKeyDown(e, row)}
-          className="cell-editor"
           autoFocus
+          className="cell-editor"
         />
       );
     }
-    
-    const displayValue = column.cellRenderer 
-      ? column.cellRenderer(cellValue)
-      : cellValue?.toString() || '';
-    
+
+    const displayValue = column.cellRenderer ? column.cellRenderer(value) : value;
+
     return (
       <span
-        className={`cell-content ${editable ? 'editable' : ''}`}
-        onDoubleClick={() => handleCellDoubleClick(row.id, column.field, cellValue)}
+        className={`cell-content ${editable && column.editable !== false ? 'editable' : ''}`}
+        onDoubleClick={() => handleCellDoubleClick(row.id, column.field, value)}
       >
         {displayValue}
       </span>
