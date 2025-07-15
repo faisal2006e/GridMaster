@@ -117,6 +117,7 @@ export const Grid: React.FC<GridProps> = ({
             onColumnChooserOpen={() => setShowColumnChooser(true)}
             onColumnVisibilityChange={handleColumnVisibilityChange}
             setSortConfig={setSortConfig}
+            setColumns={setColumns}
             showColumnChooser={columnChooser}
           />
           <GridBody

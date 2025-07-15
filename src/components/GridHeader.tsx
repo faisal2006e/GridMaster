@@ -12,6 +12,7 @@ interface GridHeaderProps {
   onColumnChooserOpen?: () => void;
   onColumnVisibilityChange?: (field: string, visible: boolean) => void;
   setSortConfig?: (config: SortConfig | null) => void;
+  setColumns?: (columns: Column[] | ((prev: Column[]) => Column[])) => void;
   showColumnChooser?: boolean;
 }
 
@@ -24,6 +25,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   onColumnChooserOpen,
   onColumnVisibilityChange,
   setSortConfig,
+  setColumns,
   showColumnChooser = false
 }) => {
   const [activeFilterDropdown, setActiveFilterDropdown] = useState<string | null>(null);
@@ -106,14 +108,91 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   const handleAutosizeColumn = () => {
-    // Placeholder for autosize functionality
-    console.log('Autosize column:', threeDotsMenuField);
+    if (threeDotsMenuField && onColumnVisibilityChange) {
+      // Calculate content width for the specific column
+      const columnIndex = columns.findIndex(col => col.field === threeDotsMenuField);
+      if (columnIndex !== -1) {
+        // Create a temporary element to measure text width
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        if (context) {
+          context.font = '14px Arial'; // Default font
+          
+          // Get all cell values for this column from the DOM
+          const cells = document.querySelectorAll(`table.grid-table td:nth-child(${columnIndex + 1})`);
+          const headerCell = document.querySelector(`table.grid-table th:nth-child(${columnIndex + 1})`);
+          
+          let maxWidth = 100; // Minimum width
+          
+          // Measure header text
+          if (headerCell) {
+            const headerText = columns[columnIndex].headerName;
+            const headerWidth = context.measureText(headerText).width + 60; // Add padding for sort icons
+            maxWidth = Math.max(maxWidth, headerWidth);
+          }
+          
+          // Measure cell content
+          cells.forEach(cell => {
+            const cellText = cell.textContent || '';
+            const cellWidth = context.measureText(cellText).width + 24; // Add padding
+            maxWidth = Math.max(maxWidth, cellWidth);
+          });
+          
+          // Cap the maximum width to prevent extremely wide columns
+          maxWidth = Math.min(maxWidth, 400);
+          
+          // Update the column width
+          setColumns(prev => 
+            prev.map(col => 
+              col.field === threeDotsMenuField 
+                ? { ...col, width: Math.ceil(maxWidth) }
+                : col
+            )
+          );
+        }
+      }
+    }
     handleThreeDotsMenuClose();
   };
 
   const handleAutosizeAllColumns = () => {
-    // Placeholder for autosize all functionality
-    console.log('Autosize all columns');
+    if (onColumnVisibilityChange) {
+      // Create a temporary element to measure text width
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.font = '14px Arial'; // Default font
+        
+        const updatedColumns = columns.map((column, columnIndex) => {
+          // Get all cell values for this column from the DOM
+          const cells = document.querySelectorAll(`table.grid-table td:nth-child(${columnIndex + 1})`);
+          const headerCell = document.querySelector(`table.grid-table th:nth-child(${columnIndex + 1})`);
+          
+          let maxWidth = 100; // Minimum width
+          
+          // Measure header text
+          if (headerCell) {
+            const headerText = column.headerName;
+            const headerWidth = context.measureText(headerText).width + 60; // Add padding for sort icons
+            maxWidth = Math.max(maxWidth, headerWidth);
+          }
+          
+          // Measure cell content
+          cells.forEach(cell => {
+            const cellText = cell.textContent || '';
+            const cellWidth = context.measureText(cellText).width + 24; // Add padding
+            maxWidth = Math.max(maxWidth, cellWidth);
+          });
+          
+          // Cap the maximum width to prevent extremely wide columns
+          maxWidth = Math.min(maxWidth, 400);
+          
+          return { ...column, width: Math.ceil(maxWidth) };
+        });
+        
+        setColumns(updatedColumns);
+      }
+    }
     handleThreeDotsMenuClose();
   };
 
