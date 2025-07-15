@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Column, SortConfig, FilterConfig, FilterOperator } from '../types/grid';
 import { FilterDropdown } from './FilterDropdown';
@@ -148,6 +149,7 @@ const DraggableHeaderCell: React.FC<{
       <div className="header-content">
         <span
           className={`header-title ${column.sortable ? 'sortable' : ''}`}
+          style={{ paddingLeft: '8px' }}
           onContextMenu={(e) => handleColumnRightClick(e, column.field)}
         >
           {column.headerName}
@@ -223,11 +225,6 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   const [threeDotsMenuField, setThreeDotsMenuField] = useState<string | null>(null);
   const [threeDotsMenuPosition, setThreeDotsMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [filterDropdownPosition, setFilterDropdownPosition] = useState<{ x: number; y: number } | null>(null);
-
-  const getSortIcon = (field: string) => {
-    if (sortConfig?.field !== field) return <i className="fas fa-sort"></i>;
-    return sortConfig.direction === 'asc' ? <i className="fas fa-sort-up"></i> : <i className="fas fa-sort-down"></i>;
-  };
 
   const visibleColumns = columns.filter(column => column.visible !== false);
 
@@ -318,7 +315,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   const handleAutosizeColumn = () => {
-    if (threeDotsMenuField && onColumnVisibilityChange) {
+    if (threeDotsMenuField && setColumns) {
       const columnIndex = columns.findIndex(col => col.field === threeDotsMenuField);
       if (columnIndex !== -1) {
         const canvas = document.createElement('canvas');
@@ -359,7 +356,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   const handleAutosizeAllColumns = () => {
-    if (onColumnVisibilityChange) {
+    if (setColumns) {
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       if (context) {
@@ -426,7 +423,6 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
       <thead>
         <tr>
           {visibleColumns.map((column, index) => {
-            const isFilterActive = filterConfig[column.field]?.conditions?.some(c => c.value);
             return (
               <DraggableHeaderCell
                 key={column.field}
