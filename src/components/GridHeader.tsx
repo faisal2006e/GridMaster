@@ -234,37 +234,35 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
             onContextMenu={(e) => handleColumnRightClick(e, column.field)}
           >
             <div className="header-content">
-              <div className="header-title-row">
-                <span 
-                  className={`header-title ${column.sortable ? 'sortable' : ''}`}
-                  onClick={() => column.sortable && onSort(column.field)}
-                >
-                  {column.headerName}
-                  {column.sortable && (
-                    <span className="sort-icon">{getSortIcon(column.field)}</span>
-                  )}
-                </span>
-                
-                {column.filterable && (
-                  <div className="filter-controls">
-                    <button
-                      className={`filter-menu-button ${filterConfig[column.field]?.value ? 'active' : ''}`}
-                      onClick={(e) => handleThreeDotsClick(e, column.field)}
-                      title="Column Options"
-                    >
-                      ⋮
-                    </button>
-                    {activeFilterDropdown === column.field && (
-                      <FilterDropdown
-                        field={column.field}
-                        filterConfig={filterConfig}
-                        onFilterChange={onFilter}
-                        onClose={() => setActiveFilterDropdown(null)}
-                      />
-                    )}
-                  </div>
+              <span 
+                className={`header-title ${column.sortable ? 'sortable' : ''}`}
+                onClick={() => column.sortable && onSort(column.field)}
+              >
+                {column.headerName}
+                {column.sortable && (
+                  <span className="sort-icon">{getSortIcon(column.field)}</span>
                 )}
-              </div>
+              </span>
+              
+              {column.filterable && (
+                <div className="filter-controls">
+                  <button
+                    className={`filter-menu-button ${filterConfig[column.field]?.value ? 'active' : ''}`}
+                    onClick={(e) => handleThreeDotsClick(e, column.field)}
+                    title="Column Options"
+                  >
+                    ⋮
+                  </button>
+                  {activeFilterDropdown === column.field && (
+                    <FilterDropdown
+                      field={column.field}
+                      filterConfig={filterConfig}
+                      onFilterChange={onFilter}
+                      onClose={() => setActiveFilterDropdown(null)}
+                    />
+                  )}
+                </div>
+              )}
             </div>
           </th>
         ))}

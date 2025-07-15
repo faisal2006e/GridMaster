@@ -15,6 +15,28 @@
   flex-direction: column;
 }
 
+.grid-drag-area {
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.grid-drag-area .drag-icon {
+  font-size: 14px;
+  color: #999;
+}
+
+.grid-drag-area .drag-text {
+  font-size: 13px;
+  color: #666;
+}
+
 .grid-table {
   width: 100%;
   border-collapse: collapse;
@@ -56,27 +78,32 @@
 
 .grid-header-cell {
   background: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
-  padding: 12px;
+  border-bottom: 1px solid #dee2e6;
+  border-right: 1px solid #dee2e6;
+  padding: 8px 12px;
   text-align: left;
-  font-weight: 600;
+  font-weight: 500;
   position: sticky;
   top: 0;
   z-index: 10;
+  font-size: 13px;
+  height: 40px;
 }
 
 .header-content {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
 }
 
 .header-title {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: 13px;
   color: #333;
+  font-weight: 500;
 }
 
 .header-title.sortable {
@@ -91,6 +118,37 @@
 .sort-icon {
   font-size: 12px;
   color: #666;
+  margin-left: 4px;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.filter-menu-button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: all 0.15s ease;
+}
+
+.filter-menu-button:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.filter-menu-button.active {
+  background: #007bff;
+  color: white;
 }
 
 .filter-input {

@@ -193,6 +193,10 @@ export const Grid: React.FC<GridProps> = ({
     <div className="grid-container">
       <GroupByRow />
       <div className="grid-wrapper">
+        <div className="grid-drag-area">
+          <span className="drag-icon">☰</span>
+          <span className="drag-text">Drag here to set row groups</span>
+        </div>
         <table className="grid-table">
           <GridHeader
             columns={columns}
