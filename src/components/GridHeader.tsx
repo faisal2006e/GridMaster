@@ -86,9 +86,6 @@ const DraggableHeaderCell: React.FC<{
       onDrop={handleDrop}
     >
       <div className="header-content">
-        <span className="drag-handle">
-          <i className="fas fa-grip-vertical"></i>
-        </span>
         {children}
       </div>
     </th>
