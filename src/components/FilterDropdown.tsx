@@ -92,6 +92,10 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
         zIndex: 1002
       }}
     >
+      <div className="filter-dropdown-header">
+        <span className="filter-dropdown-title">Filter Options</span>
+        <button className="filter-close-button" onClick={onClose}>×</button>
+      </div>
       <div className="filter-dropdown-content">
         {hasMultipleConditions && (
           <div className="filter-logic-section">
