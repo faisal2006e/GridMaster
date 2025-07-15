@@ -18,6 +18,7 @@ export const GridBody: React.FC<GridBodyProps> = ({
 }) => {
   const [editingCell, setEditingCell] = useState<{ rowId: any; field: string } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const handleCellDoubleClick = (rowId: any, field: string, currentValue: any) => {
     if (!editable) return;
@@ -50,6 +51,18 @@ export const GridBody: React.FC<GridBodyProps> = ({
     } else if (e.key === 'Escape') {
       handleCellCancel();
     }
+  };
+
+  const toggleGroupExpansion = (groupKey: string) => {
+    setExpandedGroups(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(groupKey)) {
+        newSet.delete(groupKey);
+      } else {
+        newSet.add(groupKey);
+      }
+      return newSet;
+    });
   };
 
   const renderCell = (row: any, column: Column) => {
@@ -109,15 +122,54 @@ export const GridBody: React.FC<GridBodyProps> = ({
 
   return (
     <tbody>
-      {data.map((row, index) => (
-        <tr key={row.id || index} className="grid-row">
-          {visibleColumns.map(column => (
-            <td key={column.field} className="grid-cell">
-              {renderCell(row, column)}
-            </td>
-          ))}
-        </tr>
-      ))}
+      {data.map((row, index) => {
+        // Handle group header rows
+        if (row.__isGroupHeader) {
+          const isExpanded = expandedGroups.has(row.__groupKey);
+          
+          return (
+            <tr key={`group-${row.__groupKey}`} className="grid-group-header-row">
+              <td 
+                colSpan={visibleColumns.length} 
+                className="grid-group-header-cell"
+              >
+                <div className="group-header-content">
+                  <span 
+                    className="group-header-icon"
+                    onClick={() => toggleGroupExpansion(row.__groupKey)}
+                  >
+                    {isExpanded ? '▼' : '▶'}
+                  </span>
+                  <span className="group-header-text">
+                    {row.__groupKey} ({row.__groupCount})
+                  </span>
+                </div>
+              </td>
+            </tr>
+          );
+        }
+
+        // Find the group key for this row
+        const groupKey = data.find((d, i) => 
+          i < index && d.__isGroupHeader && 
+          data.slice(i + 1, index).every(item => !item.__isGroupHeader)
+        )?.__groupKey;
+
+        // Hide row if its group is collapsed
+        if (groupKey && !expandedGroups.has(groupKey)) {
+          return null;
+        }
+
+        return (
+          <tr key={row.id || index} className="grid-row">
+            {visibleColumns.map(column => (
+              <td key={column.field} className="grid-cell">
+                {renderCell(row, column)}
+              </td>
+            ))}
+          </tr>
+        );
+      })}
     </tbody>
   );
 };

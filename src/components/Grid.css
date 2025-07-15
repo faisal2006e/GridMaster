@@ -928,6 +928,10 @@
   font-size: 12px;
   cursor: pointer;
   user-select: none;
+  transition: transform 0.2s ease;
+  display: inline-block;
+  width: 16px;
+  text-align: center;
 }
 
 .group-header-text {

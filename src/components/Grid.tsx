@@ -92,8 +92,7 @@ export const Grid: React.FC<GridProps> = ({
         __isGroupHeader: true,
         __groupKey: groupKey,
         __groupCount: groupRows.length,
-        __groupColumns: groupByColumns,
-        __expanded: true
+        __groupColumns: groupByColumns
       });
       // Add group rows
       result.push(...groupRows);
