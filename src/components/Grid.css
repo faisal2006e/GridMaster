@@ -327,6 +327,7 @@
   min-width: 12px;
   height: 16px;
   justify-content: center;
+  touch-action: none;
 }
 
 .drag-handle:hover {
@@ -337,6 +338,15 @@
 .drag-handle:active {
   cursor: grabbing;
   background-color: rgba(0, 123, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.grid-header-cell[draggable="true"] {
+  cursor: grab;
+}
+
+.grid-header-cell[draggable="true"]:active {
+  cursor: grabbing;
 }
 
 .header-content {

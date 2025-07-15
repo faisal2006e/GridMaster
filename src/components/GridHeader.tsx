@@ -229,7 +229,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   const handleDragStart = (e: React.DragEvent, field: string) => {
-    e.stopPropagation();
+    console.log('Drag start for field:', field);
     setDraggedColumn(field);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', field);
@@ -246,6 +246,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     dragImage.style.top = '-1000px';
     dragImage.style.left = '-1000px';
     dragImage.style.pointerEvents = 'none';
+    dragImage.style.zIndex = '9999';
     document.body.appendChild(dragImage);
     e.dataTransfer.setDragImage(dragImage, 50, 20);
     
@@ -276,7 +277,6 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
 
   const handleDragOver = (e: React.DragEvent, field: string) => {
     e.preventDefault();
-    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     
     // Only set drag over if we're dragging a different column
@@ -299,8 +299,9 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
 
   const handleDrop = (e: React.DragEvent, targetField: string) => {
     e.preventDefault();
-    e.stopPropagation();
     const draggedField = e.dataTransfer.getData('text/plain');
+    
+    console.log('Drop event - dragged:', draggedField, 'target:', targetField);
     
     if (draggedField === targetField || !setColumns || !draggedField) {
       setDraggedColumn(null);
@@ -309,20 +310,22 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     }
 
     // Reorder columns
-    setColumns(prevColumns => {
-      const draggedIndex = prevColumns.findIndex(col => col.field === draggedField);
-      const targetIndex = prevColumns.findIndex(col => col.field === targetField);
-      
-      if (draggedIndex === -1 || targetIndex === -1) return prevColumns;
-      
-      const newColumns = [...prevColumns];
-      const [draggedColumnObj] = newColumns.splice(draggedIndex, 1);
-      
-      // Insert at the correct position based on drop position
-      newColumns.splice(targetIndex, 0, draggedColumnObj);
-      
-      return newColumns;
-    });
+    if (setColumns) {
+      setColumns(prevColumns => {
+        const draggedIndex = prevColumns.findIndex(col => col.field === draggedField);
+        const targetIndex = prevColumns.findIndex(col => col.field === targetField);
+        
+        if (draggedIndex === -1 || targetIndex === -1) return prevColumns;
+        
+        const newColumns = [...prevColumns];
+        const [draggedColumnObj] = newColumns.splice(draggedIndex, 1);
+        
+        // Insert at the correct position based on drop position
+        newColumns.splice(targetIndex, 0, draggedColumnObj);
+        
+        return newColumns;
+      });
+    }
     
     setDraggedColumn(null);
     setDragOverColumn(null);
@@ -346,9 +349,17 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                 className="drag-handle" 
                 title="Drag to reorder column"
                 draggable={true}
-                onDragStart={(e) => handleDragStart(e, column.field)}
-                onDragEnd={handleDragEnd}
-                onMouseDown={(e) => e.stopPropagation()}
+                onDragStart={(e) => {
+                  e.stopPropagation();
+                  handleDragStart(e, column.field);
+                }}
+                onDragEnd={(e) => {
+                  e.stopPropagation();
+                  handleDragEnd(e);
+                }}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
               >
                 ⋮⋮
               </span>
