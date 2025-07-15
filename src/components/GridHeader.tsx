@@ -51,11 +51,6 @@ const DraggableHeaderCell: React.FC<{
   const [startX, setStartX] = useState(0);
   const [startWidth, setStartWidth] = useState(0);
 
-  const getSortIcon = (field: string) => {
-    if (sortConfig?.field !== field) return <i className="fas fa-sort"></i>;
-    return sortConfig.direction === 'asc' ? <i className="fas fa-sort-up"></i> : <i className="fas fa-sort-down"></i>;
-  };
-
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
     e.dataTransfer.setData('text/plain', column.field);
@@ -426,7 +421,6 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
       <thead>
         <tr>
           {visibleColumns.map((column, index) => {
-            const isFilterActive = filterConfig[column.field]?.conditions?.some(c => c.value);
             return (
               <DraggableHeaderCell
                 key={column.field}
