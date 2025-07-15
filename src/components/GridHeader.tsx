@@ -84,9 +84,62 @@ const DraggableHeaderCell: React.FC<{
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onClick={(e) => {
+        // Only trigger sort if we're not clicking on filter buttons
+        if (!e.target.closest('.filter-controls') && column.sortable) {
+          onSort(column.field);
+        }
+      }}
     >
       <div className="header-content">
-        {children}
+        <span
+          className={`header-title ${column.sortable ? 'sortable' : ''}`}
+          onContextMenu={(e) => handleColumnRightClick(e, column.field)}
+        >
+          {column.headerName}
+          {column.sortable && (
+            <span className="sort-icon">{getSortIcon(column.field)}</span>
+          )}
+        </span>
+
+        {column.filterable && (
+          <div className="filter-controls">
+            <button
+              className={`filter-button ${isFilterActive ? 'active' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (activeFilterDropdown === column.field) {
+                  setActiveFilterDropdown(null);
+                } else {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setFilterDropdownPosition({
+                    x: rect.left,
+                    y: rect.bottom + 5
+                  });
+                  setActiveFilterDropdown(column.field);
+                }
+              }}
+              title="Filter"
+            >
+              <i className="fas fa-filter"></i>
+            </button>
+            <button
+              className="filter-menu-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const rect = e.currentTarget.getBoundingClientRect();
+                setThreeDotsMenuPosition({
+                  x: rect.left,
+                  y: rect.bottom + 2
+                });
+                setThreeDotsMenuField(column.field);
+              }}
+              title="Column options"
+            >
+              <i className="fas fa-ellipsis-v"></i>
+            </button>
+          </div>
+        )}
       </div>
     </th>
   );
@@ -314,7 +367,6 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
               >
                 <span
                   className={`header-title ${column.sortable ? 'sortable' : ''}`}
-                  onClick={() => column.sortable && onSort(column.field)}
                   onContextMenu={(e) => handleColumnRightClick(e, column.field)}
                 >
                   {column.headerName}
@@ -328,6 +380,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                     <button
                       className={`filter-button ${isFilterActive ? 'active' : ''}`}
                       onClick={(e) => {
+                        e.stopPropagation();
                         if (activeFilterDropdown === column.field) {
                           setActiveFilterDropdown(null);
                         } else {

@@ -130,6 +130,10 @@
   user-select: none;
 }
 
+.grid-header-cell:hover {
+  background-color: #e9ecef;
+}
+
 .grid-header-cell:active {
   cursor: grabbing;
 }
