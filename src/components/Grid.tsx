@@ -35,6 +35,9 @@ export const Grid: React.FC<GridProps> = ({
         }
         return [...prev, { field, headerName }];
       });
+      
+      // Hide the column from the grid when added to group by
+      handleColumnVisibilityChange(field, false);
     };
 
     window.addEventListener('groupByColumn', handleGroupByColumn as EventListener);
@@ -155,6 +158,8 @@ export const Grid: React.FC<GridProps> = ({
 
   const handleRemoveGroupBy = (field: string) => {
     setGroupByColumns(prev => prev.filter(col => col.field !== field));
+    // Show the column back in the grid when removed from group by
+    handleColumnVisibilityChange(field, true);
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
@@ -254,6 +259,9 @@ export const Grid: React.FC<GridProps> = ({
                 }
                 return [...prev, { field: columnData.field, headerName: columnData.headerName }];
               });
+              
+              // Hide the column from the grid when added to group by
+              handleColumnVisibilityChange(columnData.field, false);
             }
           }}
         >
@@ -280,7 +288,13 @@ export const Grid: React.FC<GridProps> = ({
               ))}
               <button 
                 className="drag-area-clear-all"
-                onClick={() => setGroupByColumns([])}
+                onClick={() => {
+                  // Show all grouped columns back in the grid
+                  groupByColumns.forEach(col => {
+                    handleColumnVisibilityChange(col.field, true);
+                  });
+                  setGroupByColumns([]);
+                }}
                 title="Clear all grouping"
               >
                 Clear All
