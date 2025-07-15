@@ -54,10 +54,6 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
   return (
     <div ref={dropdownRef} className="filter-dropdown">
-      <div className="filter-dropdown-header">
-        <button className="filter-close-button" onClick={onClose}>×</button>
-      </div>
-      
       <div className="filter-dropdown-content">
         <div className="filter-operator-section">
           <label>Filter Type:</label>
