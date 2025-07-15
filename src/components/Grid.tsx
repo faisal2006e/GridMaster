@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { GridProps, SortConfig, FilterConfig, FilterOperator } from '../types/grid';
 import { GridHeader } from './GridHeader';
@@ -35,7 +34,7 @@ export const Grid: React.FC<GridProps> = ({
         }
         return [...prev, { field, headerName }];
       });
-      
+
       // Hide the column from the grid when added to group by
       handleColumnVisibilityChange(field, false);
     };
@@ -48,14 +47,14 @@ export const Grid: React.FC<GridProps> = ({
     return data.filter(row => {
       return Object.entries(filterConfig).every(([field, filter]) => {
         if (!filter?.conditions || filter.conditions.length === 0) return true;
-        
+
         const cellValue = row[field]?.toString().toLowerCase() || '';
-        
+
         const evaluateCondition = (condition: any) => {
           const column = columns.find(col => col.field === field);
           const originalValue = row[field];
           const filterValue = condition.value;
-          
+
           // Handle blank/not blank operators
           if (condition.operator === 'blank') {
             return originalValue == null || originalValue === '' || originalValue === undefined;
@@ -63,16 +62,16 @@ export const Grid: React.FC<GridProps> = ({
           if (condition.operator === 'notBlank') {
             return originalValue != null && originalValue !== '' && originalValue !== undefined;
           }
-          
+
           // Handle numeric operators
           if (column?.dataType === 'number') {
             const numValue = Number(originalValue);
             const numFilterValue = Number(filterValue);
-            
+
             if (isNaN(numValue) || isNaN(numFilterValue)) {
               return false;
             }
-            
+
             switch (condition.operator) {
               case 'equals':
                 return numValue === numFilterValue;
@@ -90,16 +89,16 @@ export const Grid: React.FC<GridProps> = ({
                 return false;
             }
           }
-          
+
           // Handle date, time, and datetime operators
           if (column?.dataType === 'date' || column?.dataType === 'time' || column?.dataType === 'datetime') {
             const dateValue = new Date(originalValue);
             const filterDateValue = new Date(filterValue);
-            
+
             if (isNaN(dateValue.getTime()) || isNaN(filterDateValue.getTime())) {
               return false;
             }
-            
+
             switch (condition.operator) {
               case 'equals':
                 return dateValue.getTime() === filterDateValue.getTime();
@@ -117,12 +116,12 @@ export const Grid: React.FC<GridProps> = ({
                 return false;
             }
           }
-          
+
           // Handle boolean operators  
           if (column?.dataType === 'boolean') {
             const boolValue = Boolean(originalValue);
             const filterBoolValue = filterValue.toLowerCase() === 'true';
-            
+
             switch (condition.operator) {
               case 'equals':
                 return boolValue === filterBoolValue;
@@ -132,7 +131,7 @@ export const Grid: React.FC<GridProps> = ({
                 return false;
             }
           }
-          
+
           // Handle string operators (default)
           switch (condition.operator) {
             case 'contains':
@@ -156,43 +155,8 @@ export const Grid: React.FC<GridProps> = ({
             default:
               return false;
           }
-              case 'greaterThanOrEqual':
-                return numValue >= numFilterValue;
-              case 'lessThan':
-                return numValue < numFilterValue;
-              case 'lessThanOrEqual':
-                return numValue <= numFilterValue;
-              default:
-                return numValue === numFilterValue;
-            }
-          }
-          
-          // Handle string operators
-          const stringValue = cellValue;
-          const stringFilterValue = filterValue.toLowerCase();
-          
-          switch (condition.operator) {
-            case 'contains':
-              return stringValue.includes(stringFilterValue);
-            case 'notContains':
-              return !stringValue.includes(stringFilterValue);
-            case 'like':
-              return stringValue.includes(stringFilterValue);
-            case 'notLike':
-              return !stringValue.includes(stringFilterValue);
-            case 'equals':
-              return stringValue === stringFilterValue;
-            case 'notEquals':
-              return stringValue !== stringFilterValue;
-            case 'startsWith':
-              return stringValue.startsWith(stringFilterValue);
-            case 'endsWith':
-              return stringValue.endsWith(stringFilterValue);
-            default:
-              return stringValue.includes(stringFilterValue);
-          }
         };
-        
+
         if (filter.logic === 'OR') {
           return filter.conditions.some(evaluateCondition);
         } else {
@@ -206,7 +170,7 @@ export const Grid: React.FC<GridProps> = ({
     if (groupByColumns.length === 0) return filteredData;
 
     const groups: { [key: string]: any[] } = {};
-    
+
     filteredData.forEach(row => {
       const groupKey = groupByColumns.map(col => row[col.field] || 'Unknown').join(' | ');
       if (!groups[groupKey]) {
@@ -233,14 +197,14 @@ export const Grid: React.FC<GridProps> = ({
 
   const sortedData = useMemo(() => {
     if (!sortConfig) return groupedData;
-    
+
     return [...groupedData].sort((a, b) => {
       // Don't sort group headers
       if (a.__isGroupHeader || b.__isGroupHeader) return 0;
-      
+
       const aValue = a[sortConfig.field];
       const bValue = b[sortConfig.field];
-      
+
       if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
@@ -249,7 +213,7 @@ export const Grid: React.FC<GridProps> = ({
 
   const paginatedData = useMemo(() => {
     if (!pagination) return sortedData;
-    
+
     const startIndex = (currentPage - 1) * currentPageSize;
     const endIndex = startIndex + currentPageSize;
     return sortedData.slice(startIndex, endIndex);
@@ -305,7 +269,7 @@ export const Grid: React.FC<GridProps> = ({
           const rect = gridTable.getBoundingClientRect();
           const isOutside = e.clientY < rect.top || e.clientY > rect.bottom || 
                            e.clientX < rect.left || e.clientX > rect.right;
-          
+
           if (isOutside) {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
@@ -319,11 +283,11 @@ export const Grid: React.FC<GridProps> = ({
           const rect = gridTable.getBoundingClientRect();
           const isOutside = e.clientY < rect.top || e.clientY > rect.bottom || 
                            e.clientX < rect.left || e.clientX > rect.right;
-          
+
           if (isOutside) {
             e.preventDefault();
             const draggedField = e.dataTransfer.getData('text/plain');
-            
+
             if (draggedField) {
               handleColumnVisibilityChange(draggedField, false);
             }
@@ -349,12 +313,12 @@ export const Grid: React.FC<GridProps> = ({
             e.preventDefault();
             e.stopPropagation();
             e.currentTarget.classList.remove('drag-over');
-            
+
             console.log('Drop event fired in group area');
-            
+
             // Try to get column data from different data transfer types
             let columnData = null;
-            
+
             try {
               const columnJson = e.dataTransfer.getData('application/column');
               console.log('Column JSON:', columnJson);
@@ -374,9 +338,9 @@ export const Grid: React.FC<GridProps> = ({
                 };
               }
             }
-            
+
             console.log('Final column data:', columnData);
-            
+
             if (columnData) {
               setGroupByColumns(prev => {
                 // Check if column is already grouped
@@ -385,7 +349,7 @@ export const Grid: React.FC<GridProps> = ({
                 }
                 return [...prev, { field: columnData.field, headerName: columnData.headerName }];
               });
-              
+
               // Hide the column from the grid when added to group by
               handleColumnVisibilityChange(columnData.field, false);
             }
@@ -450,7 +414,7 @@ export const Grid: React.FC<GridProps> = ({
           />
         </table>
       </div>
-      
+
       {pagination && (
         <GridPagination
           currentPage={currentPage}
@@ -461,7 +425,7 @@ export const Grid: React.FC<GridProps> = ({
           onPageSizeChange={handlePageSizeChange}
         />
       )}
-      
+
       {showColumnChooser && (
         <ColumnChooser
           columns={columns}
