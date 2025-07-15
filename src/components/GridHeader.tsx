@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Column, SortConfig, FilterConfig, FilterOperator } from '../types/grid';
 import { FilterDropdown } from './FilterDropdown';

@@ -22,23 +22,7 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
 }) => {
   const currentFilter = filterConfig[field];
   const defaultOperator = column.dataType === 'number' ? 'equals' : 'contains';
-  const [conditions, setConditions] = useState<FilterCondition[]>(
-    currentFilter?.conditions || [{ id: Date.now().toString(), value: '', operator: defaultOperator }]
-  );
-  const [logic, setLogic] = useState<FilterLogic>(currentFilter?.logic || 'AND');
-  const filterOperators = getFilterOperators(column.dataType);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onClose]);
 
   const getFilterOperators = (dataType: string = 'string'): { value: FilterOperator; label: string }[] => {
     if (dataType === 'number') {
@@ -69,6 +53,23 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
       { value: 'notBlank', label: 'Not blank' }
     ];
   };
+
+  const filterOperators = getFilterOperators(column.dataType);
+  const [conditions, setConditions] = useState<FilterCondition[]>(
+    currentFilter?.conditions || [{ id: Date.now().toString(), value: '', operator: defaultOperator }]
+  );
+  const [logic, setLogic] = useState<FilterLogic>(currentFilter?.logic || 'AND');
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [onClose]);
 
   const addCondition = () => {
     const newCondition: FilterCondition = {
