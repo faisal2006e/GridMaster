@@ -234,6 +234,12 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.opacity = '0.5';
     }
+
+    // Add class to grid container for outside drop zone styling
+    const gridContainer = document.querySelector('.grid-container');
+    if (gridContainer) {
+      gridContainer.classList.add('drag-outside');
+    }
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
@@ -243,6 +249,12 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     // Reset visual indicator
     if (e.currentTarget instanceof HTMLElement) {
       e.currentTarget.style.opacity = '1';
+    }
+
+    // Remove class from grid container
+    const gridContainer = document.querySelector('.grid-container');
+    if (gridContainer) {
+      gridContainer.classList.remove('drag-outside');
     }
   };
 

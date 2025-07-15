@@ -190,10 +190,65 @@ export const Grid: React.FC<GridProps> = ({
   };
 
   return (
-    <div className="grid-container">
+    <div 
+      className="grid-container"
+      onDragOver={(e) => {
+        // Check if we're outside the grid table area
+        const gridTable = document.querySelector('.grid-table');
+        if (gridTable) {
+          const rect = gridTable.getBoundingClientRect();
+          const isOutside = e.clientY < rect.top || e.clientY > rect.bottom || 
+                           e.clientX < rect.left || e.clientX > rect.right;
+          
+          if (isOutside) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+          }
+        }
+      }}
+      onDrop={(e) => {
+        // Check if we're outside the grid table area
+        const gridTable = document.querySelector('.grid-table');
+        if (gridTable) {
+          const rect = gridTable.getBoundingClientRect();
+          const isOutside = e.clientY < rect.top || e.clientY > rect.bottom || 
+                           e.clientX < rect.left || e.clientX > rect.right;
+          
+          if (isOutside) {
+            e.preventDefault();
+            const draggedField = e.dataTransfer.getData('text/plain');
+            
+            if (draggedField) {
+              handleColumnVisibilityChange(draggedField, false);
+            }
+          }
+        }
+      }}
+    >
       <GroupByRow />
       <div className="grid-wrapper">
-        <div className="grid-drag-area">
+        <div 
+          className="grid-drag-area"
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            const draggedField = e.dataTransfer.getData('text/plain');
+            const draggedColumn = columns.find(col => col.field === draggedField);
+            
+            if (draggedColumn) {
+              setGroupByColumns(prev => {
+                // Check if column is already grouped
+                if (prev.some(col => col.field === draggedField)) {
+                  return prev;
+                }
+                return [...prev, { field: draggedField, headerName: draggedColumn.headerName }];
+              });
+            }
+          }}
+        >
           <span className="drag-icon">☰</span>
           <span className="drag-text">Drag here to set row groups</span>
         </div>

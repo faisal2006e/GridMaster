@@ -16,25 +16,49 @@
 }
 
 .grid-drag-area {
-  background: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-  padding: 8px 12px;
-  font-size: 13px;
-  color: #666;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  min-height: 32px;
-}
-
-.grid-drag-area .drag-icon {
+  padding: 12px;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 6px;
+  margin-bottom: 1px;
+  color: #6c757d;
   font-size: 14px;
-  color: #999;
+  min-height: 40px;
+  transition: all 0.2s ease;
 }
 
-.grid-drag-area .drag-text {
-  font-size: 13px;
-  color: #666;
+.grid-drag-area:hover {
+  background: #e9ecef;
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.grid-container {
+  position: relative;
+}
+
+.grid-container::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0;
+  background: rgba(220, 53, 69, 0.1);
+  border: 3px dashed #dc3545;
+  transition: opacity 0.2s ease;
+}
+
+.grid-container.drag-outside::after {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .grid-table {
