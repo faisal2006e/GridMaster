@@ -279,7 +279,8 @@
 /* Drag and Drop Styles */
 .grid-header-cell {
   cursor: grab;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  position: relative;
 }
 
 .grid-header-cell:active {
@@ -287,13 +288,27 @@
 }
 
 .grid-header-cell.dragging {
-  opacity: 0.5;
-  transform: rotate(5deg);
+  opacity: 0.6;
+  background-color: #f8f9fa;
+  transform: scale(0.98);
+  z-index: 10;
 }
 
 .grid-header-cell.drag-over {
   background-color: #e3f2fd;
-  border-left: 3px solid #007bff;
+  border-left: 4px solid #007bff;
+  transform: translateX(2px);
+}
+
+.grid-header-cell.drag-over::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
 }
 
 .drag-handle {
@@ -306,14 +321,19 @@
   writing-mode: vertical-lr;
   line-height: 8px;
   user-select: none;
+  padding: 2px;
+  border-radius: 2px;
+  transition: all 0.15s ease;
 }
 
 .drag-handle:hover {
   color: #007bff;
+  background-color: rgba(0, 123, 255, 0.1);
 }
 
 .drag-handle:active {
   cursor: grabbing;
+  background-color: rgba(0, 123, 255, 0.2);
 }
 
 .header-content {

@@ -233,10 +233,23 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', field);
     
-    // Add a visual indicator
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = '0.5';
-    }
+    // Create a custom drag image
+    const dragImage = document.createElement('div');
+    dragImage.innerHTML = columns.find(col => col.field === field)?.headerName || field;
+    dragImage.style.padding = '8px 12px';
+    dragImage.style.background = '#007bff';
+    dragImage.style.color = 'white';
+    dragImage.style.borderRadius = '4px';
+    dragImage.style.fontSize = '14px';
+    dragImage.style.position = 'absolute';
+    dragImage.style.top = '-1000px';
+    document.body.appendChild(dragImage);
+    e.dataTransfer.setDragImage(dragImage, 0, 0);
+    
+    // Clean up drag image after a short delay
+    setTimeout(() => {
+      document.body.removeChild(dragImage);
+    }, 0);
 
     // Add class to grid container for outside drop zone styling
     const gridContainer = document.querySelector('.grid-container');
@@ -248,11 +261,6 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   const handleDragEnd = (e: React.DragEvent) => {
     setDraggedColumn(null);
     setDragOverColumn(null);
-    
-    // Reset visual indicator
-    if (e.currentTarget instanceof HTMLElement) {
-      e.currentTarget.style.opacity = '1';
-    }
 
     // Remove class from grid container
     const gridContainer = document.querySelector('.grid-container');
@@ -264,18 +272,29 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   const handleDragOver = (e: React.DragEvent, field: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    setDragOverColumn(field);
+    
+    // Only set drag over if we're dragging a different column
+    if (draggedColumn && draggedColumn !== field) {
+      setDragOverColumn(field);
+    }
   };
 
-  const handleDragLeave = () => {
-    setDragOverColumn(null);
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Only clear drag over if we're leaving the entire header cell
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setDragOverColumn(null);
+    }
   };
 
   const handleDrop = (e: React.DragEvent, targetField: string) => {
     e.preventDefault();
     const draggedField = e.dataTransfer.getData('text/plain');
     
-    if (draggedField === targetField || !setColumns) return;
+    if (draggedField === targetField || !setColumns || !draggedField) return;
 
     // Reorder columns
     setColumns(prevColumns => {
@@ -285,8 +304,14 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
       if (draggedIndex === -1 || targetIndex === -1) return prevColumns;
       
       const newColumns = [...prevColumns];
-      const [draggedColumn] = newColumns.splice(draggedIndex, 1);
-      newColumns.splice(targetIndex, 0, draggedColumn);
+      const [draggedColumnObj] = newColumns.splice(draggedIndex, 1);
+      
+      // Insert at the correct position
+      if (draggedIndex < targetIndex) {
+        newColumns.splice(targetIndex - 1, 0, draggedColumnObj);
+      } else {
+        newColumns.splice(targetIndex, 0, draggedColumnObj);
+      }
       
       return newColumns;
     });
@@ -308,7 +333,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
             onDragStart={(e) => handleDragStart(e, column.field)}
             onDragEnd={handleDragEnd}
             onDragOver={(e) => handleDragOver(e, column.field)}
-            onDragLeave={handleDragLeave}
+            onDragLeave={(e) => handleDragLeave(e)}
             onDrop={(e) => handleDrop(e, column.field)}
           >
             <div className="header-content">
