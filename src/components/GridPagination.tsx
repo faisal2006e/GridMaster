@@ -7,6 +7,7 @@ interface GridPaginationProps {
   onPageChange: (page: number) => void;
   totalItems: number;
   pageSize: number;
+  onPageSizeChange: (pageSize: number) => void;
 }
 
 export const GridPagination: React.FC<GridPaginationProps> = ({
@@ -14,7 +15,8 @@ export const GridPagination: React.FC<GridPaginationProps> = ({
   totalPages,
   onPageChange,
   totalItems,
-  pageSize
+  pageSize,
+  onPageSizeChange
 }) => {
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
@@ -39,8 +41,25 @@ export const GridPagination: React.FC<GridPaginationProps> = ({
 
   return (
     <div className="grid-pagination">
-      <div className="pagination-info">
-        Showing {startItem} to {endItem} of {totalItems} entries
+      <div className="pagination-left">
+        <div className="pagination-info">
+          Showing {startItem} to {endItem} of {totalItems} entries
+        </div>
+        <div className="page-size-selector">
+          <label htmlFor="pageSize">Page size:</label>
+          <select 
+            id="pageSize"
+            value={pageSize} 
+            onChange={(e) => onPageSizeChange(Number(e.target.value))}
+            className="page-size-select"
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
       </div>
       
       <div className="pagination-controls">

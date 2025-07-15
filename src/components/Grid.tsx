@@ -20,6 +20,7 @@ export const Grid: React.FC<GridProps> = ({
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   const [filterConfig, setFilterConfig] = useState<FilterConfig>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentPageSize, setCurrentPageSize] = useState(pageSize);
   const [showColumnChooser, setShowColumnChooser] = useState(false);
   const [groupByColumns, setGroupByColumns] = useState<Array<{field: string, headerName: string}>>([]);
 
@@ -120,10 +121,10 @@ export const Grid: React.FC<GridProps> = ({
   const paginatedData = useMemo(() => {
     if (!pagination) return sortedData;
     
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
+    const startIndex = (currentPage - 1) * currentPageSize;
+    const endIndex = startIndex + currentPageSize;
     return sortedData.slice(startIndex, endIndex);
-  }, [sortedData, currentPage, pageSize, pagination]);
+  }, [sortedData, currentPage, currentPageSize, pagination]);
 
   const handleSort = (field: string) => {
     setSortConfig(prevSort => {
@@ -156,7 +157,12 @@ export const Grid: React.FC<GridProps> = ({
     setGroupByColumns(prev => prev.filter(col => col.field !== field));
   };
 
-  const totalPages = Math.ceil(sortedData.length / pageSize);
+  const handlePageSizeChange = (newPageSize: number) => {
+    setCurrentPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
+  const totalPages = Math.ceil(sortedData.length / currentPageSize);
 
   return (
     <div 
@@ -282,7 +288,8 @@ export const Grid: React.FC<GridProps> = ({
           totalPages={totalPages}
           onPageChange={setCurrentPage}
           totalItems={sortedData.length}
-          pageSize={pageSize}
+          pageSize={currentPageSize}
+          onPageSizeChange={handlePageSizeChange}
         />
       )}
       

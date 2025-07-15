@@ -949,9 +949,38 @@
   border: 1px solid #dee2e6;
 }
 
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .pagination-info {
   font-size: 14px;
   color: #666;
+}
+
+.page-size-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.page-size-select {
+  padding: 4px 8px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.page-size-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .pagination-controls {
