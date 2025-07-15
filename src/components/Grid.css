@@ -127,6 +127,7 @@
 .grid-header-cell {
   cursor: grab;
   transition: all 0.2s ease;
+  user-select: none;
 }
 
 .grid-header-cell:active {
@@ -341,7 +342,6 @@
 .drag-handle {
   color: #999;
   font-size: 12px;
-  cursor: grab;
   margin-right: 6px;
   display: flex;
   align-items: center;
@@ -357,16 +357,15 @@
   min-width: 12px;
   height: 16px;
   justify-content: center;
+  pointer-events: none;
 }
 
-.drag-handle:hover {
+.grid-header-cell:hover .drag-handle {
   color: #007bff;
-  background-color: rgba(0, 123, 255, 0.1);
 }
 
-.drag-handle:active {
-  cursor: grabbing;
-  background-color: rgba(0, 123, 255, 0.2);
+.grid-header-cell.dragging .drag-handle {
+  color: #007bff;
   transform: scale(1.1);
 }
 

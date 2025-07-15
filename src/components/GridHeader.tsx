@@ -74,21 +74,19 @@ const DraggableHeaderCell: React.FC<{
         opacity: isDragging ? 0.5 : 1,
         backgroundColor: isOver ? '#e3f2fd' : undefined,
         borderLeft: isOver ? '3px solid #007bff' : undefined,
+        cursor: 'grab'
       }}
       className={`grid-header-cell ${isOver ? 'drag-over' : ''} ${isDragging ? 'dragging' : ''}`}
+      title="Drag to reorder column or group by"
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
       <div className="header-content">
-        <span 
-          className="drag-handle" 
-          title="Drag to reorder column or group by"
-          style={{ cursor: 'grab' }}
-          draggable
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
+        <span className="drag-handle">
           <i className="fas fa-grip-vertical"></i>
         </span>
         {children}
