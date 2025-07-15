@@ -20,10 +20,36 @@ const DraggableHeaderCell: React.FC<{
   column: Column;
   index: number;
   moveColumn: (fromIndex: number, toIndex: number) => void;
-  children: React.ReactNode;
-}> = ({ column, index, moveColumn, children }) => {
+  onSort: (field: string) => void;
+  sortConfig: SortConfig | null;
+  filterConfig: FilterConfig;
+  activeFilterDropdown: string | null;
+  setActiveFilterDropdown: (field: string | null) => void;
+  setFilterDropdownPosition: (position: { x: number; y: number } | null) => void;
+  setThreeDotsMenuPosition: (position: { x: number; y: number } | null) => void;
+  setThreeDotsMenuField: (field: string | null) => void;
+  handleColumnRightClick: (e: React.MouseEvent, field: string) => void;
+}> = ({ 
+  column, 
+  index, 
+  moveColumn, 
+  onSort, 
+  sortConfig, 
+  filterConfig, 
+  activeFilterDropdown, 
+  setActiveFilterDropdown, 
+  setFilterDropdownPosition, 
+  setThreeDotsMenuPosition, 
+  setThreeDotsMenuField, 
+  handleColumnRightClick 
+}) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isOver, setIsOver] = useState(false);
+
+  const getSortIcon = (field: string) => {
+    if (sortConfig?.field !== field) return <i className="fas fa-sort"></i>;
+    return sortConfig.direction === 'asc' ? <i className="fas fa-sort-up"></i> : <i className="fas fa-sort-down"></i>;
+  };
 
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
@@ -105,7 +131,7 @@ const DraggableHeaderCell: React.FC<{
         {column.filterable && (
           <div className="filter-controls">
             <button
-              className={`filter-button ${isFilterActive ? 'active' : ''}`}
+              className={`filter-button ${filterConfig[column.field]?.conditions?.some(c => c.value) ? 'active' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
                 if (activeFilterDropdown === column.field) {
@@ -364,56 +390,16 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                 column={column}
                 index={index}
                 moveColumn={moveColumn}
-              >
-                <span
-                  className={`header-title ${column.sortable ? 'sortable' : ''}`}
-                  onContextMenu={(e) => handleColumnRightClick(e, column.field)}
-                >
-                  {column.headerName}
-                  {column.sortable && (
-                    <span className="sort-icon">{getSortIcon(column.field)}</span>
-                  )}
-                </span>
-
-                {column.filterable && (
-                  <div className="filter-controls">
-                    <button
-                      className={`filter-button ${isFilterActive ? 'active' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (activeFilterDropdown === column.field) {
-                          setActiveFilterDropdown(null);
-                        } else {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          setFilterDropdownPosition({
-                            x: rect.left,
-                            y: rect.bottom + 5
-                          });
-                          setActiveFilterDropdown(column.field);
-                        }
-                      }}
-                      title="Filter"
-                    >
-                      <i className="fas fa-filter"></i>
-                    </button>
-                    <button
-                      className="filter-menu-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setThreeDotsMenuPosition({
-                          x: rect.left,
-                          y: rect.bottom + 2
-                        });
-                        setThreeDotsMenuField(column.field);
-                      }}
-                      title="Column options"
-                    >
-                      <i className="fas fa-ellipsis-v"></i>
-                    </button>
-                  </div>
-                )}
-              </DraggableHeaderCell>
+                onSort={onSort}
+                sortConfig={sortConfig}
+                filterConfig={filterConfig}
+                activeFilterDropdown={activeFilterDropdown}
+                setActiveFilterDropdown={setActiveFilterDropdown}
+                setFilterDropdownPosition={setFilterDropdownPosition}
+                setThreeDotsMenuPosition={setThreeDotsMenuPosition}
+                setThreeDotsMenuField={setThreeDotsMenuField}
+                handleColumnRightClick={handleColumnRightClick}
+              />
             );
           })}
         </tr>
