@@ -27,9 +27,17 @@ export interface SortConfig {
 
 export type FilterOperator = 'contains' | 'notContains' | 'like' | 'notLike' | 'equals' | 'notEquals' | 'startsWith' | 'endsWith';
 
+export type FilterCondition = {
+  value: string;
+  operator: FilterOperator;
+  id: string;
+};
+
+export type FilterLogic = 'AND' | 'OR';
+
 export interface FilterConfig {
   [field: string]: {
-    value: string;
-    operator: FilterOperator;
+    conditions: FilterCondition[];
+    logic: FilterLogic;
   };
 }

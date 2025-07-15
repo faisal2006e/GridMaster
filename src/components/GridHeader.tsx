@@ -8,7 +8,7 @@ interface GridHeaderProps {
   sortConfig: SortConfig | null;
   filterConfig: FilterConfig;
   onSort: (field: string) => void;
-  onFilter: (field: string, value: string, operator: FilterOperator) => void;
+  onFilter: (field: string, conditions: any[], logic: any) => void;
   onColumnChooserOpen?: () => void;
   onColumnVisibilityChange?: (field: string, visible: boolean) => void;
   setSortConfig?: (config: SortConfig | null) => void;
@@ -53,7 +53,7 @@ const DraggableHeaderCell: React.FC<{
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsOver(false);
-    
+
     try {
       const columnData = e.dataTransfer.getData('application/column');
       if (columnData) {
@@ -328,7 +328,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
               {column.filterable && (
                 <div className="filter-controls">
                   <button
-                    className={`filter-button ${filterConfig[column.field]?.value ? 'active' : ''}`}
+                    className={`filter-button ${filterConfig[column.field]?.conditions?.some(c => c.value) ? 'active' : ''}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       setActiveFilterDropdown(activeFilterDropdown === column.field ? null : column.field);
@@ -339,8 +339,16 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                   </button>
                   <button
                     className="filter-menu-button"
-                    onClick={(e) => handleThreeDotsClick(e, column.field)}
-                    title="Column Options"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setThreeDotsMenuPosition({
+                        x: rect.left,
+                        y: rect.bottom + 2
+                      });
+                      setThreeDotsMenuField(column.field);
+                    }}
+                    title="Column options"
                   >
                     <i className="fas fa-ellipsis-v"></i>
                   </button>

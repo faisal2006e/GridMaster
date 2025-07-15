@@ -47,30 +47,39 @@ export const Grid: React.FC<GridProps> = ({
   const filteredData = useMemo(() => {
     return data.filter(row => {
       return Object.entries(filterConfig).every(([field, filter]) => {
-        if (!filter?.value) return true;
+        if (!filter?.conditions || filter.conditions.length === 0) return true;
         
         const cellValue = row[field]?.toString().toLowerCase() || '';
-        const filterValue = filter.value.toLowerCase();
         
-        switch (filter.operator) {
-          case 'contains':
-            return cellValue.includes(filterValue);
-          case 'notContains':
-            return !cellValue.includes(filterValue);
-          case 'like':
-            return cellValue.includes(filterValue);
-          case 'notLike':
-            return !cellValue.includes(filterValue);
-          case 'equals':
-            return cellValue === filterValue;
-          case 'notEquals':
-            return cellValue !== filterValue;
-          case 'startsWith':
-            return cellValue.startsWith(filterValue);
-          case 'endsWith':
-            return cellValue.endsWith(filterValue);
-          default:
-            return cellValue.includes(filterValue);
+        const evaluateCondition = (condition: any) => {
+          const filterValue = condition.value.toLowerCase();
+          
+          switch (condition.operator) {
+            case 'contains':
+              return cellValue.includes(filterValue);
+            case 'notContains':
+              return !cellValue.includes(filterValue);
+            case 'like':
+              return cellValue.includes(filterValue);
+            case 'notLike':
+              return !cellValue.includes(filterValue);
+            case 'equals':
+              return cellValue === filterValue;
+            case 'notEquals':
+              return cellValue !== filterValue;
+            case 'startsWith':
+              return cellValue.startsWith(filterValue);
+            case 'endsWith':
+              return cellValue.endsWith(filterValue);
+            default:
+              return cellValue.includes(filterValue);
+          }
+        };
+        
+        if (filter.logic === 'OR') {
+          return filter.conditions.some(evaluateCondition);
+        } else {
+          return filter.conditions.every(evaluateCondition);
         }
       });
     });
@@ -140,10 +149,10 @@ export const Grid: React.FC<GridProps> = ({
     });
   };
 
-  const handleFilter = (field: string, value: string, operator: FilterOperator) => {
+  const handleFilter = (field: string, conditions: any[], logic: any) => {
     setFilterConfig(prev => ({
       ...prev,
-      [field]: value ? { value, operator } : undefined
+      [field]: conditions.length > 0 ? { conditions, logic } : undefined
     }));
     setCurrentPage(1);
   };
