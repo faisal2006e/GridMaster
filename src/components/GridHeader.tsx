@@ -205,12 +205,15 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   const handleGroupByColumn = () => {
-    if (threeDotsMenuField && onFilter) {
-      // Add this column to group by
-      const event = new CustomEvent('groupByColumn', { 
-        detail: { field: threeDotsMenuField, headerName: columns.find(col => col.field === threeDotsMenuField)?.headerName }
-      });
-      window.dispatchEvent(event);
+    if (threeDotsMenuField) {
+      // Find the column and add it to group by
+      const column = columns.find(col => col.field === threeDotsMenuField);
+      if (column) {
+        const event = new CustomEvent('groupByColumn', { 
+          detail: { field: threeDotsMenuField, headerName: column.headerName }
+        });
+        window.dispatchEvent(event);
+      }
     }
     handleThreeDotsMenuClose();
   };

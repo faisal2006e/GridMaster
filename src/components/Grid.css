@@ -37,6 +37,12 @@
   color: #007bff;
 }
 
+.grid-drag-area.drag-over {
+  background: #e3f2fd;
+  border-color: #007bff;
+  color: #007bff;
+}
+
 .grid-container {
   position: relative;
 }
@@ -59,6 +65,26 @@
 .grid-container.drag-outside::after {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Fix draggable columns */
+.grid-header-cell {
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.grid-header-cell:active {
+  cursor: grabbing;
+}
+
+.grid-header-cell.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+.grid-header-cell.drag-over {
+  background-color: #e3f2fd;
+  border-left: 3px solid #007bff;
 }
 
 .grid-table {

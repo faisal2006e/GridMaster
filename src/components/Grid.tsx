@@ -232,9 +232,14 @@ export const Grid: React.FC<GridProps> = ({
           onDragOver={(e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+          }}
+          onDragLeave={(e) => {
+            e.currentTarget.classList.remove('drag-over');
           }}
           onDrop={(e) => {
             e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
             const draggedField = e.dataTransfer.getData('text/plain');
             const draggedColumn = columns.find(col => col.field === draggedField);
             
