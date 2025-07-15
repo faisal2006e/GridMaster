@@ -24,7 +24,6 @@
 
 ![Grid Library Demo](https://github.com/faisal2006e/GridMaster/blob/main/Screenshots/ColumnChosser2.PNG)
 
-![Grid Library Demo](https://github.com/faisal2006e/GridMaster/blob/main/Screenshots/Grouping.PNG)
 
-![Grid Library Demo](https://github.com/faisal2006e/GridMaster/blob/main/Screenshots/Grouping.png)
+![Grid Library Demo](https://github.com/faisal2006e/GridMaster/blob/main/Screenshots/Grouping.PNG)
 
