@@ -230,9 +230,14 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
 
   const handleDragStart = (e: React.DragEvent, field: string) => {
     console.log('Drag start for field:', field);
+    
+    // Prevent default to ensure drag works
+    e.stopPropagation();
+    
     setDraggedColumn(field);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', field);
+    e.dataTransfer.setData('application/x-column-field', field);
     
     // Create a custom drag image
     const dragImage = document.createElement('div');
@@ -248,14 +253,18 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     dragImage.style.pointerEvents = 'none';
     dragImage.style.zIndex = '9999';
     document.body.appendChild(dragImage);
-    e.dataTransfer.setDragImage(dragImage, 50, 20);
+    
+    // Use requestAnimationFrame to ensure the element is rendered before setting drag image
+    requestAnimationFrame(() => {
+      e.dataTransfer.setDragImage(dragImage, 50, 20);
+    });
     
     // Clean up drag image after a short delay
     setTimeout(() => {
       if (document.body.contains(dragImage)) {
         document.body.removeChild(dragImage);
       }
-    }, 100);
+    }, 200);
 
     // Add class to grid container for outside drop zone styling
     const gridContainer = document.querySelector('.grid-container');
@@ -277,6 +286,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
 
   const handleDragOver = (e: React.DragEvent, field: string) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     
     // Only set drag over if we're dragging a different column
@@ -299,7 +309,12 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
 
   const handleDrop = (e: React.DragEvent, targetField: string) => {
     e.preventDefault();
-    const draggedField = e.dataTransfer.getData('text/plain');
+    e.stopPropagation();
+    
+    // Try to get dragged field from multiple data formats
+    const draggedField = e.dataTransfer.getData('application/x-column-field') || 
+                         e.dataTransfer.getData('text/plain') || 
+                         draggedColumn;
     
     console.log('Drop event - dragged:', draggedField, 'target:', targetField);
     
@@ -349,17 +364,13 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                 className="drag-handle" 
                 title="Drag to reorder column"
                 draggable={true}
-                onDragStart={(e) => {
-                  e.stopPropagation();
-                  handleDragStart(e, column.field);
-                }}
-                onDragEnd={(e) => {
-                  e.stopPropagation();
-                  handleDragEnd(e);
-                }}
+                onDragStart={(e) => handleDragStart(e, column.field)}
+                onDragEnd={(e) => handleDragEnd(e)}
                 onMouseDown={(e) => {
                   e.stopPropagation();
+                  e.preventDefault();
                 }}
+                onSelectStart={(e) => e.preventDefault()}
               >
                 ⋮⋮
               </span>
