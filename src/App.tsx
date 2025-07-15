@@ -19,17 +19,18 @@ const sampleData = [
 ];
 
 const columns: Column[] = [
-  { field: 'id', headerName: 'ID', width: 80, sortable: true },
-  { field: 'name', headerName: 'Name', width: 150, sortable: true, filterable: true },
-  { field: 'email', headerName: 'Email', width: 200, sortable: true, filterable: true },
-  { field: 'age', headerName: 'Age', width: 100, sortable: true, filterable: true },
-  { field: 'department', headerName: 'Department', width: 150, sortable: true, filterable: true },
+  { field: 'id', headerName: 'ID', width: 80, sortable: true, dataType: 'number' },
+  { field: 'name', headerName: 'Name', width: 150, sortable: true, filterable: true, dataType: 'string' },
+  { field: 'email', headerName: 'Email', width: 200, sortable: true, filterable: true, dataType: 'string' },
+  { field: 'age', headerName: 'Age', width: 100, sortable: true, filterable: true, dataType: 'number' },
+  { field: 'department', headerName: 'Department', width: 150, sortable: true, filterable: true, dataType: 'string' },
   { 
     field: 'salary', 
     headerName: 'Salary', 
     width: 120, 
     sortable: true, 
     filterable: true,
+    dataType: 'number',
     cellRenderer: (value: number) => `$${value.toLocaleString()}`
   },
 ];

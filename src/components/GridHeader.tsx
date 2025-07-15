@@ -593,6 +593,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
       {activeFilterDropdown && (
         <FilterDropdown
           field={activeFilterDropdown}
+          column={columns.find(col => col.field === activeFilterDropdown) || { field: activeFilterDropdown }}
           filterConfig={filterConfig}
           onFilterChange={onFilter}
           onClose={() => setActiveFilterDropdown(null)}

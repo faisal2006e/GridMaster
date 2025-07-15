@@ -5,6 +5,7 @@ import { FilterOperator, FilterConfig, FilterCondition, FilterLogic } from '../t
 
 interface FilterDropdownProps {
   field: string;
+  column: { field: string; dataType?: string };
   filterConfig: FilterConfig;
   onFilterChange: (field: string, conditions: FilterCondition[], logic: FilterLogic) => void;
   onClose: () => void;
@@ -13,16 +14,19 @@ interface FilterDropdownProps {
 
 export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   field,
+  column,
   filterConfig,
   onFilterChange,
   onClose,
   position
 }) => {
   const currentFilter = filterConfig[field];
+  const defaultOperator = column.dataType === 'number' ? 'equals' : 'contains';
   const [conditions, setConditions] = useState<FilterCondition[]>(
-    currentFilter?.conditions || [{ id: Date.now().toString(), value: '', operator: 'contains' }]
+    currentFilter?.conditions || [{ id: Date.now().toString(), value: '', operator: defaultOperator }]
   );
   const [logic, setLogic] = useState<FilterLogic>(currentFilter?.logic || 'AND');
+  const filterOperators = getFilterOperators(column.dataType);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,22 +40,41 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
-  const filterOperators: { value: FilterOperator; label: string }[] = [
-    { value: 'contains', label: 'Contains' },
-    { value: 'notContains', label: 'Not Contains' },
-    { value: 'like', label: 'Like' },
-    { value: 'notLike', label: 'Not Like' },
-    { value: 'equals', label: 'Equals' },
-    { value: 'notEquals', label: 'Not Equals' },
-    { value: 'startsWith', label: 'Starts With' },
-    { value: 'endsWith', label: 'Ends With' }
-  ];
+  const getFilterOperators = (dataType: string = 'string'): { value: FilterOperator; label: string }[] => {
+    if (dataType === 'number') {
+      return [
+        { value: 'equals', label: 'Equals' },
+        { value: 'notEquals', label: 'Does not equal' },
+        { value: 'greaterThan', label: 'Greater than' },
+        { value: 'greaterThanOrEqual', label: 'Greater than or equal to' },
+        { value: 'lessThan', label: 'Less than' },
+        { value: 'lessThanOrEqual', label: 'Less than or equal to' },
+        { value: 'between', label: 'Between' },
+        { value: 'blank', label: 'Blank' },
+        { value: 'notBlank', label: 'Not blank' }
+      ];
+    }
+    
+    // Default string operators
+    return [
+      { value: 'contains', label: 'Contains' },
+      { value: 'notContains', label: 'Not Contains' },
+      { value: 'like', label: 'Like' },
+      { value: 'notLike', label: 'Not Like' },
+      { value: 'equals', label: 'Equals' },
+      { value: 'notEquals', label: 'Not Equals' },
+      { value: 'startsWith', label: 'Starts With' },
+      { value: 'endsWith', label: 'Ends With' },
+      { value: 'blank', label: 'Blank' },
+      { value: 'notBlank', label: 'Not blank' }
+    ];
+  };
 
   const addCondition = () => {
     const newCondition: FilterCondition = {
       id: Date.now().toString(),
       value: '',
-      operator: 'contains'
+      operator: defaultOperator
     };
     setConditions([...conditions, newCondition]);
   };

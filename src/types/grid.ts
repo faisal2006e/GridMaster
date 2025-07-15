@@ -8,6 +8,7 @@ export interface Column {
   editable?: boolean;
   cellRenderer?: (value: any) => string | React.ReactNode;
   visible?: boolean;
+  dataType?: 'string' | 'number' | 'date' | 'boolean';
 }
 
 export interface GridProps {
@@ -25,7 +26,7 @@ export interface SortConfig {
   direction: 'asc' | 'desc';
 }
 
-export type FilterOperator = 'contains' | 'notContains' | 'like' | 'notLike' | 'equals' | 'notEquals' | 'startsWith' | 'endsWith';
+export type FilterOperator = 'contains' | 'notContains' | 'like' | 'notLike' | 'equals' | 'notEquals' | 'startsWith' | 'endsWith' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'between' | 'blank' | 'notBlank';
 
 export type FilterCondition = {
   value: string;

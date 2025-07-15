@@ -52,27 +52,68 @@ export const Grid: React.FC<GridProps> = ({
         const cellValue = row[field]?.toString().toLowerCase() || '';
         
         const evaluateCondition = (condition: any) => {
-          const filterValue = condition.value.toLowerCase();
+          const column = columns.find(col => col.field === field);
+          const originalValue = row[field];
+          const filterValue = condition.value;
+          
+          // Handle blank/not blank operators
+          if (condition.operator === 'blank') {
+            return originalValue == null || originalValue === '' || originalValue === undefined;
+          }
+          if (condition.operator === 'notBlank') {
+            return originalValue != null && originalValue !== '' && originalValue !== undefined;
+          }
+          
+          // Handle numeric operators
+          if (column?.dataType === 'number') {
+            const numValue = Number(originalValue);
+            const numFilterValue = Number(filterValue);
+            
+            if (isNaN(numValue) || isNaN(numFilterValue)) {
+              return false;
+            }
+            
+            switch (condition.operator) {
+              case 'equals':
+                return numValue === numFilterValue;
+              case 'notEquals':
+                return numValue !== numFilterValue;
+              case 'greaterThan':
+                return numValue > numFilterValue;
+              case 'greaterThanOrEqual':
+                return numValue >= numFilterValue;
+              case 'lessThan':
+                return numValue < numFilterValue;
+              case 'lessThanOrEqual':
+                return numValue <= numFilterValue;
+              default:
+                return numValue === numFilterValue;
+            }
+          }
+          
+          // Handle string operators
+          const stringValue = cellValue;
+          const stringFilterValue = filterValue.toLowerCase();
           
           switch (condition.operator) {
             case 'contains':
-              return cellValue.includes(filterValue);
+              return stringValue.includes(stringFilterValue);
             case 'notContains':
-              return !cellValue.includes(filterValue);
+              return !stringValue.includes(stringFilterValue);
             case 'like':
-              return cellValue.includes(filterValue);
+              return stringValue.includes(stringFilterValue);
             case 'notLike':
-              return !cellValue.includes(filterValue);
+              return !stringValue.includes(stringFilterValue);
             case 'equals':
-              return cellValue === filterValue;
+              return stringValue === stringFilterValue;
             case 'notEquals':
-              return cellValue !== filterValue;
+              return stringValue !== stringFilterValue;
             case 'startsWith':
-              return cellValue.startsWith(filterValue);
+              return stringValue.startsWith(stringFilterValue);
             case 'endsWith':
-              return cellValue.endsWith(filterValue);
+              return stringValue.endsWith(stringFilterValue);
             default:
-              return cellValue.includes(filterValue);
+              return stringValue.includes(stringFilterValue);
           }
         };
         
