@@ -7,13 +7,15 @@ interface GridBodyProps {
   columns: Column[];
   editable?: boolean;
   onRowUpdate?: (updatedRow: any) => void;
+  showColumnChooser?: boolean;
 }
 
 export const GridBody: React.FC<GridBodyProps> = ({
   data,
   columns,
   editable = false,
-  onRowUpdate
+  onRowUpdate,
+  showColumnChooser = false
 }) => {
   const [editingCell, setEditingCell] = useState<{ rowId: any; field: string } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
@@ -83,11 +85,16 @@ export const GridBody: React.FC<GridBodyProps> = ({
     );
   };
 
+  const visibleColumns = columns.filter(column => column.visible !== false);
+
   return (
     <tbody>
       {data.map((row, index) => (
         <tr key={row.id || index} className="grid-row">
-          {columns.map(column => (
+          {showColumnChooser && (
+            <td className="grid-cell column-chooser-cell"></td>
+          )}
+          {visibleColumns.map(column => (
             <td key={column.field} className="grid-cell">
               {renderCell(row, column)}
             </td>

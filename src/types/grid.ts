@@ -7,6 +7,7 @@ export interface Column {
   filterable?: boolean;
   editable?: boolean;
   cellRenderer?: (value: any) => string | React.ReactNode;
+  visible?: boolean;
 }
 
 export interface GridProps {
@@ -16,6 +17,7 @@ export interface GridProps {
   pagination?: boolean;
   pageSize?: number;
   editable?: boolean;
+  columnChooser?: boolean;
 }
 
 export interface SortConfig {
@@ -23,6 +25,11 @@ export interface SortConfig {
   direction: 'asc' | 'desc';
 }
 
+export type FilterOperator = 'contains' | 'notContains' | 'like' | 'notLike' | 'equals' | 'notEquals' | 'startsWith' | 'endsWith';
+
 export interface FilterConfig {
-  [field: string]: string;
+  [field: string]: {
+    value: string;
+    operator: FilterOperator;
+  };
 }

@@ -53,6 +53,7 @@ export default function App() {
         pagination={true}
         pageSize={5}
         editable={true}
+        columnChooser={true}
       />
     </div>
   );

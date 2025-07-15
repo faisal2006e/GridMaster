@@ -1,29 +1,55 @@
 
 import React, { useState, useMemo } from 'react';
-import { GridProps, SortConfig, FilterConfig } from '../types/grid';
+import { GridProps, SortConfig, FilterConfig, FilterOperator } from '../types/grid';
 import { GridHeader } from './GridHeader';
 import { GridBody } from './GridBody';
 import { GridPagination } from './GridPagination';
+import { ColumnChooser } from './ColumnChooser';
 import './Grid.css';
 
 export const Grid: React.FC<GridProps> = ({
   data,
-  columns,
+  columns: initialColumns,
   onRowUpdate,
   pagination = false,
   pageSize = 10,
-  editable = false
+  editable = false,
+  columnChooser = false
 }) => {
+  const [columns, setColumns] = useState(initialColumns.map(col => ({ ...col, visible: col.visible !== false })));
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   const [filterConfig, setFilterConfig] = useState<FilterConfig>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [showColumnChooser, setShowColumnChooser] = useState(false);
 
   const filteredData = useMemo(() => {
     return data.filter(row => {
-      return Object.entries(filterConfig).every(([field, filterValue]) => {
-        if (!filterValue) return true;
-        const cellValue = row[field];
-        return cellValue?.toString().toLowerCase().includes(filterValue.toLowerCase());
+      return Object.entries(filterConfig).every(([field, filter]) => {
+        if (!filter?.value) return true;
+        
+        const cellValue = row[field]?.toString().toLowerCase() || '';
+        const filterValue = filter.value.toLowerCase();
+        
+        switch (filter.operator) {
+          case 'contains':
+            return cellValue.includes(filterValue);
+          case 'notContains':
+            return !cellValue.includes(filterValue);
+          case 'like':
+            return cellValue.includes(filterValue);
+          case 'notLike':
+            return !cellValue.includes(filterValue);
+          case 'equals':
+            return cellValue === filterValue;
+          case 'notEquals':
+            return cellValue !== filterValue;
+          case 'startsWith':
+            return cellValue.startsWith(filterValue);
+          case 'endsWith':
+            return cellValue.endsWith(filterValue);
+          default:
+            return cellValue.includes(filterValue);
+        }
       });
     });
   }, [data, filterConfig]);
@@ -60,12 +86,20 @@ export const Grid: React.FC<GridProps> = ({
     });
   };
 
-  const handleFilter = (field: string, value: string) => {
+  const handleFilter = (field: string, value: string, operator: FilterOperator) => {
     setFilterConfig(prev => ({
       ...prev,
-      [field]: value
+      [field]: value ? { value, operator } : undefined
     }));
     setCurrentPage(1);
+  };
+
+  const handleColumnVisibilityChange = (field: string, visible: boolean) => {
+    setColumns(prev => 
+      prev.map(col => 
+        col.field === field ? { ...col, visible } : col
+      )
+    );
   };
 
   const totalPages = Math.ceil(sortedData.length / pageSize);
@@ -80,12 +114,15 @@ export const Grid: React.FC<GridProps> = ({
             filterConfig={filterConfig}
             onSort={handleSort}
             onFilter={handleFilter}
+            onColumnChooserOpen={() => setShowColumnChooser(true)}
+            showColumnChooser={columnChooser}
           />
           <GridBody
             data={paginatedData}
             columns={columns}
             editable={editable}
             onRowUpdate={onRowUpdate}
+            showColumnChooser={columnChooser}
           />
         </table>
       </div>
@@ -97,6 +134,14 @@ export const Grid: React.FC<GridProps> = ({
           onPageChange={setCurrentPage}
           totalItems={sortedData.length}
           pageSize={pageSize}
+        />
+      )}
+      
+      {showColumnChooser && (
+        <ColumnChooser
+          columns={columns}
+          onColumnVisibilityChange={handleColumnVisibilityChange}
+          onClose={() => setShowColumnChooser(false)}
         />
       )}
     </div>
