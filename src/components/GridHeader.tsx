@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useDrag, useDrop, DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Column, SortConfig, FilterConfig, FilterOperator } from '../types/grid';
 import { FilterDropdown } from './FilterDropdown';
 
@@ -17,46 +15,59 @@ interface GridHeaderProps {
   showColumnChooser?: boolean;
 }
 
-interface DragItem {
-  type: string;
-  field: string;
-  index: number;
-}
-
-const COLUMN_TYPE = 'column';
-
 const DraggableHeaderCell: React.FC<{
   column: Column;
   index: number;
   moveColumn: (fromIndex: number, toIndex: number) => void;
   children: React.ReactNode;
 }> = ({ column, index, moveColumn, children }) => {
-  const [{ isDragging }, drag, preview] = useDrag({
-    type: COLUMN_TYPE,
-    item: { type: COLUMN_TYPE, field: column.field, index },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
+  const [isDragging, setIsDragging] = useState(false);
+  const [isOver, setIsOver] = useState(false);
 
-  const [{ isOver }, drop] = useDrop({
-    accept: COLUMN_TYPE,
-    drop: (item: DragItem) => {
-      if (item.index !== index) {
-        moveColumn(item.index, index);
+  const handleDragStart = (e: React.DragEvent) => {
+    setIsDragging(true);
+    e.dataTransfer.setData('text/plain', column.field);
+    e.dataTransfer.setData('application/column', JSON.stringify({
+      field: column.field,
+      headerName: column.headerName,
+      index: index
+    }));
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsOver(false);
+    
+    try {
+      const columnData = e.dataTransfer.getData('application/column');
+      if (columnData) {
+        const draggedColumn = JSON.parse(columnData);
+        if (draggedColumn.index !== index) {
+          moveColumn(draggedColumn.index, index);
+        }
       }
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  });
+    } catch (error) {
+      console.error('Error parsing column data:', error);
+    }
+  };
 
   return (
     <th
-      ref={(node) => {
-        preview(node);
-        drop(node);
-      }}
       style={{ 
         width: column.width,
         opacity: isDragging ? 0.5 : 1,
@@ -64,21 +75,18 @@ const DraggableHeaderCell: React.FC<{
         borderLeft: isOver ? '3px solid #007bff' : undefined,
       }}
       className={`grid-header-cell ${isOver ? 'drag-over' : ''} ${isDragging ? 'dragging' : ''}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
     >
       <div className="header-content">
         <span 
-          ref={drag}
           className="drag-handle" 
           title="Drag to reorder column or group by"
           style={{ cursor: 'grab' }}
           draggable
-          onDragStart={(e) => {
-            e.dataTransfer.setData('text/plain', column.field);
-            e.dataTransfer.setData('application/column', JSON.stringify({
-              field: column.field,
-              headerName: column.headerName
-            }));
-          }}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
         >
           ⋮⋮
         </span>
@@ -296,51 +304,49 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
 
   return (
     <>
-      <DndProvider backend={HTML5Backend}>
-        <thead>
-          <tr>
-            {visibleColumns.map((column, index) => (
-              <DraggableHeaderCell
-                key={column.field}
-                column={column}
-                index={index}
-                moveColumn={moveColumn}
+      <thead>
+        <tr>
+          {visibleColumns.map((column, index) => (
+            <DraggableHeaderCell
+              key={column.field}
+              column={column}
+              index={index}
+              moveColumn={moveColumn}
+            >
+              <span 
+                className={`header-title ${column.sortable ? 'sortable' : ''}`}
+                onClick={() => column.sortable && onSort(column.field)}
+                onContextMenu={(e) => handleColumnRightClick(e, column.field)}
               >
-                <span 
-                  className={`header-title ${column.sortable ? 'sortable' : ''}`}
-                  onClick={() => column.sortable && onSort(column.field)}
-                  onContextMenu={(e) => handleColumnRightClick(e, column.field)}
-                >
-                  {column.headerName}
-                  {column.sortable && (
-                    <span className="sort-icon">{getSortIcon(column.field)}</span>
-                  )}
-                </span>
-
-                {column.filterable && (
-                  <div className="filter-controls">
-                    <button
-                      className={`filter-menu-button ${filterConfig[column.field]?.value ? 'active' : ''}`}
-                      onClick={(e) => handleThreeDotsClick(e, column.field)}
-                      title="Column Options"
-                    >
-                      ⋮
-                    </button>
-                    {activeFilterDropdown === column.field && (
-                      <FilterDropdown
-                        field={column.field}
-                        filterConfig={filterConfig}
-                        onFilterChange={onFilter}
-                        onClose={() => setActiveFilterDropdown(null)}
-                      />
-                    )}
-                  </div>
+                {column.headerName}
+                {column.sortable && (
+                  <span className="sort-icon">{getSortIcon(column.field)}</span>
                 )}
-              </DraggableHeaderCell>
-            ))}
-          </tr>
-        </thead>
-      </DndProvider>
+              </span>
+
+              {column.filterable && (
+                <div className="filter-controls">
+                  <button
+                    className={`filter-menu-button ${filterConfig[column.field]?.value ? 'active' : ''}`}
+                    onClick={(e) => handleThreeDotsClick(e, column.field)}
+                    title="Column Options"
+                  >
+                    ⋮
+                  </button>
+                  {activeFilterDropdown === column.field && (
+                    <FilterDropdown
+                      field={column.field}
+                      filterConfig={filterConfig}
+                      onFilterChange={onFilter}
+                      onClose={() => setActiveFilterDropdown(null)}
+                    />
+                  )}
+                </div>
+              )}
+            </DraggableHeaderCell>
+          ))}
+        </tr>
+      </thead>
 
       {/* Column Context Menu */}
       {columnMenuField && columnMenuPosition && (

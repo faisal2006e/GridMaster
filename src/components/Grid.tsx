@@ -209,23 +209,32 @@ export const Grid: React.FC<GridProps> = ({
             e.currentTarget.classList.add('drag-over');
           }}
           onDragLeave={(e) => {
-            e.currentTarget.classList.remove('drag-over');
+            // Only remove drag-over if we're actually leaving the drop zone
+            if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+              e.currentTarget.classList.remove('drag-over');
+            }
           }}
           onDrop={(e) => {
             e.preventDefault();
+            e.stopPropagation();
             e.currentTarget.classList.remove('drag-over');
+            
+            console.log('Drop event fired in group area');
             
             // Try to get column data from different data transfer types
             let columnData = null;
             
             try {
               const columnJson = e.dataTransfer.getData('application/column');
+              console.log('Column JSON:', columnJson);
               if (columnJson) {
                 columnData = JSON.parse(columnJson);
               }
             } catch (error) {
+              console.log('Error parsing JSON, trying fallback');
               // Fallback to plain text
               const draggedField = e.dataTransfer.getData('text/plain');
+              console.log('Dragged field:', draggedField);
               const draggedColumn = columns.find(col => col.field === draggedField);
               if (draggedColumn) {
                 columnData = {
@@ -234,6 +243,8 @@ export const Grid: React.FC<GridProps> = ({
                 };
               }
             }
+            
+            console.log('Final column data:', columnData);
             
             if (columnData) {
               setGroupByColumns(prev => {
