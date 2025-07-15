@@ -214,16 +214,34 @@ export const Grid: React.FC<GridProps> = ({
           onDrop={(e) => {
             e.preventDefault();
             e.currentTarget.classList.remove('drag-over');
-            const draggedField = e.dataTransfer.getData('text/plain');
-            const draggedColumn = columns.find(col => col.field === draggedField);
             
-            if (draggedColumn) {
+            // Try to get column data from different data transfer types
+            let columnData = null;
+            
+            try {
+              const columnJson = e.dataTransfer.getData('application/column');
+              if (columnJson) {
+                columnData = JSON.parse(columnJson);
+              }
+            } catch (error) {
+              // Fallback to plain text
+              const draggedField = e.dataTransfer.getData('text/plain');
+              const draggedColumn = columns.find(col => col.field === draggedField);
+              if (draggedColumn) {
+                columnData = {
+                  field: draggedField,
+                  headerName: draggedColumn.headerName
+                };
+              }
+            }
+            
+            if (columnData) {
               setGroupByColumns(prev => {
                 // Check if column is already grouped
-                if (prev.some(col => col.field === draggedField)) {
+                if (prev.some(col => col.field === columnData.field)) {
                   return prev;
                 }
-                return [...prev, { field: draggedField, headerName: draggedColumn.headerName }];
+                return [...prev, { field: columnData.field, headerName: columnData.headerName }];
               });
             }
           }}

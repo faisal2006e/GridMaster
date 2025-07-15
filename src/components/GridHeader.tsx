@@ -69,8 +69,16 @@ const DraggableHeaderCell: React.FC<{
         <span 
           ref={drag}
           className="drag-handle" 
-          title="Drag to reorder column"
+          title="Drag to reorder column or group by"
           style={{ cursor: 'grab' }}
+          draggable
+          onDragStart={(e) => {
+            e.dataTransfer.setData('text/plain', column.field);
+            e.dataTransfer.setData('application/column', JSON.stringify({
+              field: column.field,
+              headerName: column.headerName
+            }));
+          }}
         >
           ⋮⋮
         </span>
