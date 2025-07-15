@@ -1,13 +1,21 @@
-## Running React on Replit
+# GridMaster - A Powerful and Flexible Data Grid Library
 
-[React](https://reactjs.org/) is a popular JavaScript library for building user interfaces.
+**GridMaster** is a high-performance, feature-rich data grid library designed to help you create dynamic, responsive, and easy-to-use tables for your web applications. Whether you're building an admin dashboard, a data management interface, or any data-heavy application, **GridMaster** offers the flexibility, customization, and performance you need.
 
-[Vite](https://vitejs.dev/) is a blazing fast frontend build tool that includes features like Hot Module Reloading (HMR), optimized builds, and TypeScript support out of the box.
+## Features
 
-Using the two in conjunction is one of the fastest ways to build a web app.
+- **Sorting**: Easily sort your data by any column with a single click.
+- **Filtering**: Apply filters to your data by column or across multiple columns.
+- **Pagination**: Efficiently handle large data sets with built-in pagination.
+- **Infinite Scrolling**: Load data dynamically with scroll-based data loading.
+- **Responsive Design**: Automatically adapts to different screen sizes and devices.
+- **Customizable Cells**: Render custom content in any cell with ease.
+- **Rich API**: Easily extend and integrate with your application using a powerful and flexible API.
 
-### Getting Started
-- Hit run
-- Edit [App.tsx](#src/App.tsx) and watch it live update!
+## Installation
 
-By default, Replit runs the `dev` script, but you can configure it by changing the `run` field in the [configuration file](#.replit). Here are the vite docs for [serving production websites](https://vitejs.dev/guide/build.html)
+You can install **GridMaster** via npm or yarn.
+
+Using npm:
+```bash
+npm install gridmaster
