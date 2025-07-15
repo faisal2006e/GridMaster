@@ -72,7 +72,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                       )}
                       title="Filter"
                     >
-                      🔍
+                      ⋯
                     </button>
                     {activeFilterDropdown === column.field && (
                       <FilterDropdown
