@@ -25,7 +25,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   const [activeFilterDropdown, setActiveFilterDropdown] = useState<string | null>(null);
 
   const getSortIcon = (field: string) => {
-    if (sortConfig?.field !== field) return '↕️';
+    if (sortConfig?.field !== field) return '↑↓';
     return sortConfig.direction === 'asc' ? '↑' : '↓';
   };
 
