@@ -295,185 +295,187 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <thead>
-        <tr>
-          {visibleColumns.map((column, index) => (
-            <DraggableHeaderCell
-              key={column.field}
-              column={column}
-              index={index}
-              moveColumn={moveColumn}
-            >
-              <span 
-                className={`header-title ${column.sortable ? 'sortable' : ''}`}
-                onClick={() => column.sortable && onSort(column.field)}
-                onContextMenu={(e) => handleColumnRightClick(e, column.field)}
+    <>
+      <DndProvider backend={HTML5Backend}>
+        <thead>
+          <tr>
+            {visibleColumns.map((column, index) => (
+              <DraggableHeaderCell
+                key={column.field}
+                column={column}
+                index={index}
+                moveColumn={moveColumn}
               >
-                {column.headerName}
-                {column.sortable && (
-                  <span className="sort-icon">{getSortIcon(column.field)}</span>
-                )}
-              </span>
-
-              {column.filterable && (
-                <div className="filter-controls">
-                  <button
-                    className={`filter-menu-button ${filterConfig[column.field]?.value ? 'active' : ''}`}
-                    onClick={(e) => handleThreeDotsClick(e, column.field)}
-                    title="Column Options"
-                  >
-                    ⋮
-                  </button>
-                  {activeFilterDropdown === column.field && (
-                    <FilterDropdown
-                      field={column.field}
-                      filterConfig={filterConfig}
-                      onFilterChange={onFilter}
-                      onClose={() => setActiveFilterDropdown(null)}
-                    />
-                  )}
-                </div>
-              )}
-            </DraggableHeaderCell>
-          ))}
-        </tr>
-
-        {/* Column Context Menu */}
-        {columnMenuField && columnMenuPosition && (
-          <div className="column-context-menu-overlay" onClick={handleColumnMenuClose}>
-            <div 
-              className="column-context-menu"
-              style={{ 
-                left: columnMenuPosition.x, 
-                top: columnMenuPosition.y 
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="column-menu-item" onClick={handleSortAscending}>
-                <span className="column-menu-icon">↑</span>
-                <span>Sort Ascending</span>
-              </div>
-              <div className="column-menu-item" onClick={handleClearSort}>
-                <span className="column-menu-icon">◇</span>
-                <span>Clear Sort</span>
-              </div>
-              <div className="column-menu-divider"></div>
-              <div className="column-menu-item" onClick={handleColumnChooserFromMenu}>
-                <span className="column-menu-icon">☰</span>
-                <span>Choose Columns</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Three Dots Menu */}
-        {threeDotsMenuField && threeDotsMenuPosition && (
-          <div className="column-context-menu-overlay" onClick={handleThreeDotsMenuClose}>
-            <div 
-              className="three-dots-context-menu"
-              style={{ 
-                left: threeDotsMenuPosition.x, 
-                top: threeDotsMenuPosition.y 
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="column-menu-item" onClick={() => {
-                onSort(threeDotsMenuField);
-                if (setSortConfig) {
-                  setSortConfig({ field: threeDotsMenuField, direction: 'asc' });
-                }
-                handleThreeDotsMenuClose();
-              }}>
-                <span className="column-menu-icon">↑</span>
-                <span>Sort Ascending</span>
-              </div>
-              <div className="column-menu-item" onClick={handleSortDescending}>
-                <span className="column-menu-icon">↓</span>
-                <span>Sort Descending</span>
-              </div>
-              <div className="column-menu-item" onClick={() => {
-                if (setSortConfig) {
-                  setSortConfig(null);
-                }
-                handleThreeDotsMenuClose();
-              }}>
-                <span className="column-menu-icon">◇</span>
-                <span>Clear Sort</span>
-              </div>
-              <div className="column-menu-divider"></div>
-              <div className="column-menu-item" onClick={() => {
-                setActiveFilterDropdown(threeDotsMenuField);
-                handleThreeDotsMenuClose();
-              }}>
-                <span className="column-menu-icon">🔍</span>
-                <span>Filter</span>
-              </div>
-              <div className="column-menu-divider"></div>
-              <div className="column-menu-item" onClick={handlePinColumn}>
-                <span className="column-menu-icon">📌</span>
-                <span>Pin Column</span>
-                <span className="column-menu-arrow">▶</span>
-              </div>
-              <div className="column-menu-divider"></div>
-              <div className="column-menu-item" onClick={handleAutosizeColumn}>
-                <span className="column-menu-icon">↔</span>
-                <span>Autosize This Column</span>
-              </div>
-              <div className="column-menu-item" onClick={handleAutosizeAllColumns}>
-                <span className="column-menu-icon">↔</span>
-                <span>Autosize All Columns</span>
-              </div>
-              <div className="column-menu-divider"></div>
-              <div className="column-menu-item" onClick={handleGroupByColumn}>
-                <span className="column-menu-icon">≡</span>
-                <span>Group by {threeDotsMenuField ? columns.find(col => col.field === threeDotsMenuField)?.headerName : 'Column'}</span>
-              </div>
-              <div className="column-menu-divider"></div>
-              <div className="column-menu-item" onClick={() => {
-                setShowColumnDropdown(true);
-                handleThreeDotsMenuClose();
-              }}>
-                <span className="column-menu-icon">☰</span>
-                <span>Choose Columns</span>
-              </div>
-              <div className="column-menu-item" onClick={handleResetColumns}>
-                <span className="column-menu-icon">↺</span>
-                <span>Reset Columns</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Column Chooser Dropdown */}
-        {showColumnDropdown && (
-          <div className="column-chooser-overlay" onClick={() => setShowColumnDropdown(false)}>
-            <div className="column-chooser-dropdown-standalone" onClick={(e) => e.stopPropagation()}>
-              <div className="column-chooser-dropdown-header">
-                <span>Choose Columns</span>
-                <button 
-                  className="dropdown-close-button"
-                  onClick={() => setShowColumnDropdown(false)}
+                <span 
+                  className={`header-title ${column.sortable ? 'sortable' : ''}`}
+                  onClick={() => column.sortable && onSort(column.field)}
+                  onContextMenu={(e) => handleColumnRightClick(e, column.field)}
                 >
-                  ×
-                </button>
-              </div>
-              <div className="column-chooser-dropdown-list">
-                {columns.map(column => (
-                  <label key={column.field} className="column-dropdown-item">
-                    <input
-                      type="checkbox"
-                      checked={column.visible !== false}
-                      onChange={() => handleColumnVisibilityToggle(column.field)}
-                    />
-                    <span>{column.headerName}</span>
-                  </label>
-                ))}
-              </div>
+                  {column.headerName}
+                  {column.sortable && (
+                    <span className="sort-icon">{getSortIcon(column.field)}</span>
+                  )}
+                </span>
+
+                {column.filterable && (
+                  <div className="filter-controls">
+                    <button
+                      className={`filter-menu-button ${filterConfig[column.field]?.value ? 'active' : ''}`}
+                      onClick={(e) => handleThreeDotsClick(e, column.field)}
+                      title="Column Options"
+                    >
+                      ⋮
+                    </button>
+                    {activeFilterDropdown === column.field && (
+                      <FilterDropdown
+                        field={column.field}
+                        filterConfig={filterConfig}
+                        onFilterChange={onFilter}
+                        onClose={() => setActiveFilterDropdown(null)}
+                      />
+                    )}
+                  </div>
+                )}
+              </DraggableHeaderCell>
+            ))}
+          </tr>
+        </thead>
+      </DndProvider>
+
+      {/* Column Context Menu */}
+      {columnMenuField && columnMenuPosition && (
+        <div className="column-context-menu-overlay" onClick={handleColumnMenuClose}>
+          <div 
+            className="column-context-menu"
+            style={{ 
+              left: columnMenuPosition.x, 
+              top: columnMenuPosition.y 
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="column-menu-item" onClick={handleSortAscending}>
+              <span className="column-menu-icon">↑</span>
+              <span>Sort Ascending</span>
+            </div>
+            <div className="column-menu-item" onClick={handleClearSort}>
+              <span className="column-menu-icon">◇</span>
+              <span>Clear Sort</span>
+            </div>
+            <div className="column-menu-divider"></div>
+            <div className="column-menu-item" onClick={handleColumnChooserFromMenu}>
+              <span className="column-menu-icon">☰</span>
+              <span>Choose Columns</span>
             </div>
           </div>
-        )}
-      </thead>
-    </DndProvider>
+        </div>
+      )}
+
+      {/* Three Dots Menu */}
+      {threeDotsMenuField && threeDotsMenuPosition && (
+        <div className="column-context-menu-overlay" onClick={handleThreeDotsMenuClose}>
+          <div 
+            className="three-dots-context-menu"
+            style={{ 
+              left: threeDotsMenuPosition.x, 
+              top: threeDotsMenuPosition.y 
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="column-menu-item" onClick={() => {
+              onSort(threeDotsMenuField);
+              if (setSortConfig) {
+                setSortConfig({ field: threeDotsMenuField, direction: 'asc' });
+              }
+              handleThreeDotsMenuClose();
+            }}>
+              <span className="column-menu-icon">↑</span>
+              <span>Sort Ascending</span>
+            </div>
+            <div className="column-menu-item" onClick={handleSortDescending}>
+              <span className="column-menu-icon">↓</span>
+              <span>Sort Descending</span>
+            </div>
+            <div className="column-menu-item" onClick={() => {
+              if (setSortConfig) {
+                setSortConfig(null);
+              }
+              handleThreeDotsMenuClose();
+            }}>
+              <span className="column-menu-icon">◇</span>
+              <span>Clear Sort</span>
+            </div>
+            <div className="column-menu-divider"></div>
+            <div className="column-menu-item" onClick={() => {
+              setActiveFilterDropdown(threeDotsMenuField);
+              handleThreeDotsMenuClose();
+            }}>
+              <span className="column-menu-icon">🔍</span>
+              <span>Filter</span>
+            </div>
+            <div className="column-menu-divider"></div>
+            <div className="column-menu-item" onClick={handlePinColumn}>
+              <span className="column-menu-icon">📌</span>
+              <span>Pin Column</span>
+              <span className="column-menu-arrow">▶</span>
+            </div>
+            <div className="column-menu-divider"></div>
+            <div className="column-menu-item" onClick={handleAutosizeColumn}>
+              <span className="column-menu-icon">↔</span>
+              <span>Autosize This Column</span>
+            </div>
+            <div className="column-menu-item" onClick={handleAutosizeAllColumns}>
+              <span className="column-menu-icon">↔</span>
+              <span>Autosize All Columns</span>
+            </div>
+            <div className="column-menu-divider"></div>
+            <div className="column-menu-item" onClick={handleGroupByColumn}>
+              <span className="column-menu-icon">≡</span>
+              <span>Group by {threeDotsMenuField ? columns.find(col => col.field === threeDotsMenuField)?.headerName : 'Column'}</span>
+            </div>
+            <div className="column-menu-divider"></div>
+            <div className="column-menu-item" onClick={() => {
+              setShowColumnDropdown(true);
+              handleThreeDotsMenuClose();
+            }}>
+              <span className="column-menu-icon">☰</span>
+              <span>Choose Columns</span>
+            </div>
+            <div className="column-menu-item" onClick={handleResetColumns}>
+              <span className="column-menu-icon">↺</span>
+              <span>Reset Columns</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Column Chooser Dropdown */}
+      {showColumnDropdown && (
+        <div className="column-chooser-overlay" onClick={() => setShowColumnDropdown(false)}>
+          <div className="column-chooser-dropdown-standalone" onClick={(e) => e.stopPropagation()}>
+            <div className="column-chooser-dropdown-header">
+              <span>Choose Columns</span>
+              <button 
+                className="dropdown-close-button"
+                onClick={() => setShowColumnDropdown(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="column-chooser-dropdown-list">
+              {columns.map(column => (
+                <label key={column.field} className="column-dropdown-item">
+                  <input
+                    type="checkbox"
+                    checked={column.visible !== false}
+                    onChange={() => handleColumnVisibilityToggle(column.field)}
+                  />
+                  <span>{column.headerName}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
