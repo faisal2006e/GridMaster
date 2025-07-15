@@ -229,6 +229,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   const handleDragStart = (e: React.DragEvent, field: string) => {
+    e.stopPropagation();
     setDraggedColumn(field);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', field);
@@ -243,13 +244,17 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     dragImage.style.fontSize = '14px';
     dragImage.style.position = 'absolute';
     dragImage.style.top = '-1000px';
+    dragImage.style.left = '-1000px';
+    dragImage.style.pointerEvents = 'none';
     document.body.appendChild(dragImage);
-    e.dataTransfer.setDragImage(dragImage, 0, 0);
+    e.dataTransfer.setDragImage(dragImage, 50, 20);
     
     // Clean up drag image after a short delay
     setTimeout(() => {
-      document.body.removeChild(dragImage);
-    }, 0);
+      if (document.body.contains(dragImage)) {
+        document.body.removeChild(dragImage);
+      }
+    }, 100);
 
     // Add class to grid container for outside drop zone styling
     const gridContainer = document.querySelector('.grid-container');
@@ -271,6 +276,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
 
   const handleDragOver = (e: React.DragEvent, field: string) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     
     // Only set drag over if we're dragging a different column
@@ -280,8 +286,9 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
+    e.stopPropagation();
     // Only clear drag over if we're leaving the entire header cell
-    const rect = e.currentTarget.getBoundingClientRect();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const x = e.clientX;
     const y = e.clientY;
     
@@ -292,9 +299,14 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
 
   const handleDrop = (e: React.DragEvent, targetField: string) => {
     e.preventDefault();
+    e.stopPropagation();
     const draggedField = e.dataTransfer.getData('text/plain');
     
-    if (draggedField === targetField || !setColumns || !draggedField) return;
+    if (draggedField === targetField || !setColumns || !draggedField) {
+      setDraggedColumn(null);
+      setDragOverColumn(null);
+      return;
+    }
 
     // Reorder columns
     setColumns(prevColumns => {
@@ -306,12 +318,8 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
       const newColumns = [...prevColumns];
       const [draggedColumnObj] = newColumns.splice(draggedIndex, 1);
       
-      // Insert at the correct position
-      if (draggedIndex < targetIndex) {
-        newColumns.splice(targetIndex - 1, 0, draggedColumnObj);
-      } else {
-        newColumns.splice(targetIndex, 0, draggedColumnObj);
-      }
+      // Insert at the correct position based on drop position
+      newColumns.splice(targetIndex, 0, draggedColumnObj);
       
       return newColumns;
     });
@@ -329,15 +337,21 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
             style={{ width: column.width }}
             className={`grid-header-cell ${dragOverColumn === column.field ? 'drag-over' : ''} ${draggedColumn === column.field ? 'dragging' : ''}`}
             onContextMenu={(e) => handleColumnRightClick(e, column.field)}
-            draggable={true}
-            onDragStart={(e) => handleDragStart(e, column.field)}
-            onDragEnd={handleDragEnd}
             onDragOver={(e) => handleDragOver(e, column.field)}
-            onDragLeave={(e) => handleDragLeave(e)}
+            onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, column.field)}
           >
             <div className="header-content">
-              <span className="drag-handle" title="Drag to reorder column">⋮⋮</span>
+              <span 
+                className="drag-handle" 
+                title="Drag to reorder column"
+                draggable={true}
+                onDragStart={(e) => handleDragStart(e, column.field)}
+                onDragEnd={handleDragEnd}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                ⋮⋮
+              </span>
               <span 
                 className={`header-title ${column.sortable ? 'sortable' : ''}`}
                 onClick={() => column.sortable && onSort(column.field)}

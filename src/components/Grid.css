@@ -321,9 +321,12 @@
   writing-mode: vertical-lr;
   line-height: 8px;
   user-select: none;
-  padding: 2px;
+  padding: 2px 4px;
   border-radius: 2px;
   transition: all 0.15s ease;
+  min-width: 12px;
+  height: 16px;
+  justify-content: center;
 }
 
 .drag-handle:hover {
