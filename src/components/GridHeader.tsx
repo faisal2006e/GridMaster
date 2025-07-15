@@ -73,6 +73,11 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     handleColumnMenuClose();
   };
 
+  const handleColumnChooserFromMenu = () => {
+    setShowColumnDropdown(true);
+    handleColumnMenuClose();
+  };
+
   return (
     <thead>
       <tr>
@@ -180,10 +185,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
               <span>Clear Sort</span>
             </div>
             <div className="column-menu-divider"></div>
-            <div className="column-menu-item" onClick={() => {
-              setShowColumnDropdown(true);
-              handleColumnMenuClose();
-            }}>
+            <div className="column-menu-item" onClick={handleColumnChooserFromMenu}>
               <span className="column-menu-icon">☰</span>
               <span>Choose Columns</span>
             </div>

@@ -407,9 +407,8 @@
 
 .column-chooser-dropdown-standalone {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 20%;
+  right: 20px;
   background: white;
   border: 1px solid #dee2e6;
   border-radius: 4px;
