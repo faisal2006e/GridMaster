@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Column, SortConfig, FilterConfig, FilterOperator } from '../types/grid';
 import { FilterDropdown } from './FilterDropdown';
+import '@fortawesome/fontawesome-free/css/all.css';
 
 interface GridHeaderProps {
   columns: Column[];
@@ -88,7 +89,7 @@ const DraggableHeaderCell: React.FC<{
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          ⠿
+          <i className="fas fa-grip-vertical"></i>
         </span>
         {children}
       </div>
@@ -116,8 +117,8 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   const [threeDotsMenuPosition, setThreeDotsMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
   const getSortIcon = (field: string) => {
-    if (sortConfig?.field !== field) return '⇅';
-    return sortConfig.direction === 'asc' ? '▲' : '▼';
+    if (sortConfig?.field !== field) return <i className="fas fa-sort"></i>;
+    return sortConfig.direction === 'asc' ? <i className="fas fa-sort-up"></i> : <i className="fas fa-sort-down"></i>;
   };
 
   const visibleColumns = columns.filter(column => column.visible !== false);
@@ -334,14 +335,14 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                     }}
                     title="Filter"
                   >
-                    ⌖
+                    <i className="fas fa-filter"></i>
                   </button>
                   <button
                     className="filter-menu-button"
                     onClick={(e) => handleThreeDotsClick(e, column.field)}
                     title="Column Options"
                   >
-                    ⋯
+                    <i className="fas fa-ellipsis-v"></i>
                   </button>
                   {activeFilterDropdown === column.field && (
                     <FilterDropdown
@@ -370,16 +371,16 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="column-menu-item" onClick={handleSortAscending}>
-              <span className="column-menu-icon">▲</span>
+              <span className="column-menu-icon"><i className="fas fa-sort-up"></i></span>
               <span>Sort Ascending</span>
             </div>
             <div className="column-menu-item" onClick={handleClearSort}>
-              <span className="column-menu-icon">✕</span>
+              <span className="column-menu-icon"><i className="fas fa-times"></i></span>
               <span>Clear Sort</span>
             </div>
             <div className="column-menu-divider"></div>
             <div className="column-menu-item" onClick={handleColumnChooserFromMenu}>
-              <span className="column-menu-icon">⚏</span>
+              <span className="column-menu-icon"><i className="fas fa-columns"></i></span>
               <span>Choose Columns</span>
             </div>
           </div>
@@ -404,11 +405,11 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
               }
               handleThreeDotsMenuClose();
             }}>
-              <span className="column-menu-icon">▲</span>
+              <span className="column-menu-icon"><i className="fas fa-sort-up"></i></span>
               <span>Sort Ascending</span>
             </div>
             <div className="column-menu-item" onClick={handleSortDescending}>
-              <span className="column-menu-icon">▼</span>
+              <span className="column-menu-icon"><i className="fas fa-sort-down"></i></span>
               <span>Sort Descending</span>
             </div>
             <div className="column-menu-item" onClick={() => {
@@ -417,7 +418,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
               }
               handleThreeDotsMenuClose();
             }}>
-              <span className="column-menu-icon">✕</span>
+              <span className="column-menu-icon"><i className="fas fa-times"></i></span>
               <span>Clear Sort</span>
             </div>
             <div className="column-menu-divider"></div>
@@ -425,27 +426,27 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
               setActiveFilterDropdown(threeDotsMenuField);
               handleThreeDotsMenuClose();
             }}>
-              <span className="column-menu-icon">⌖</span>
+              <span className="column-menu-icon"><i className="fas fa-filter"></i></span>
               <span>Filter</span>
             </div>
             <div className="column-menu-divider"></div>
             <div className="column-menu-item" onClick={handlePinColumn}>
-              <span className="column-menu-icon">📌</span>
+              <span className="column-menu-icon"><i className="fas fa-thumbtack"></i></span>
               <span>Pin Column</span>
-              <span className="column-menu-arrow">▶</span>
+              <span className="column-menu-arrow"><i className="fas fa-chevron-right"></i></span>
             </div>
             <div className="column-menu-divider"></div>
             <div className="column-menu-item" onClick={handleAutosizeColumn}>
-              <span className="column-menu-icon">⟷</span>
+              <span className="column-menu-icon"><i className="fas fa-arrows-alt-h"></i></span>
               <span>Autosize This Column</span>
             </div>
             <div className="column-menu-item" onClick={handleAutosizeAllColumns}>
-              <span className="column-menu-icon">⟷</span>
+              <span className="column-menu-icon"><i className="fas fa-arrows-alt-h"></i></span>
               <span>Autosize All Columns</span>
             </div>
             <div className="column-menu-divider"></div>
             <div className="column-menu-item" onClick={handleGroupByColumn}>
-              <span className="column-menu-icon">⧉</span>
+              <span className="column-menu-icon"><i className="fas fa-layer-group"></i></span>
               <span>Group by {threeDotsMenuField ? columns.find(col => col.field === threeDotsMenuField)?.headerName : 'Column'}</span>
             </div>
             <div className="column-menu-divider"></div>
@@ -453,11 +454,11 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
               setShowColumnDropdown(true);
               handleThreeDotsMenuClose();
             }}>
-              <span className="column-menu-icon">☰</span>
+              <span className="column-menu-icon"><i className="fas fa-columns"></i></span>
               <span>Choose Columns</span>
             </div>
             <div className="column-menu-item" onClick={handleResetColumns}>
-              <span className="column-menu-icon">⟲</span>
+              <span className="column-menu-icon"><i className="fas fa-undo"></i></span>
               <span>Reset Columns</span>
             </div>
           </div>
@@ -474,7 +475,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                 className="dropdown-close-button"
                 onClick={() => setShowColumnDropdown(false)}
               >
-                ×
+                <i className="fas fa-times"></i>
               </button>
             </div>
             <div className="column-chooser-dropdown-list">
