@@ -11,12 +11,48 @@
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
 }
 
 .grid-table {
   width: 100%;
   border-collapse: collapse;
   background: white;
+  flex: 1;
+}
+
+.grid-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+  background: #fafafa;
+  border-top: 1px solid #dee2e6;
+  min-height: 200px;
+}
+
+.grid-empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #ccc;
+}
+
+.grid-empty-state-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.grid-empty-state-message {
+  font-size: 14px;
+  color: #666;
+  max-width: 300px;
 }
 
 .grid-header-cell {
@@ -257,7 +293,8 @@
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   width: 250px;
-  z-index: 100;
+  z-index: 1001;
+  margin-top: 4px;
 }
 
 .filter-dropdown-header {

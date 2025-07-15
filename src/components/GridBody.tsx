@@ -87,6 +87,24 @@ export const GridBody: React.FC<GridBodyProps> = ({
 
   const visibleColumns = columns.filter(column => column.visible !== false);
 
+  if (data.length === 0) {
+    return (
+      <tbody>
+        <tr>
+          <td colSpan={visibleColumns.length + (showColumnChooser ? 1 : 0)} style={{ padding: 0 }}>
+            <div className="grid-empty-state">
+              <div className="grid-empty-state-icon">📊</div>
+              <div className="grid-empty-state-title">No Data Found</div>
+              <div className="grid-empty-state-message">
+                No records match your current filter criteria. Try adjusting your filters or clearing them to see more results.
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    );
+  }
+
   return (
     <tbody>
       {data.map((row, index) => (
