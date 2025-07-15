@@ -29,6 +29,7 @@ const DraggableHeaderCell: React.FC<{
   setThreeDotsMenuPosition: (position: { x: number; y: number } | null) => void;
   setThreeDotsMenuField: (field: string | null) => void;
   handleColumnRightClick: (e: React.MouseEvent, field: string) => void;
+  onColumnResize: (field: string, width: number) => void;
 }> = ({ 
   column, 
   index, 
@@ -41,10 +42,14 @@ const DraggableHeaderCell: React.FC<{
   setFilterDropdownPosition, 
   setThreeDotsMenuPosition, 
   setThreeDotsMenuField, 
-  handleColumnRightClick 
+  handleColumnRightClick,
+  onColumnResize
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isOver, setIsOver] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [startWidth, setStartWidth] = useState(0);
 
   const getSortIcon = (field: string) => {
     if (sortConfig?.field !== field) return <i className="fas fa-sort"></i>;
@@ -91,6 +96,31 @@ const DraggableHeaderCell: React.FC<{
     } catch (error) {
       console.error('Error parsing column data:', error);
     }
+  };
+
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    setStartX(e.clientX);
+    setStartWidth(column.width || 150);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isResizing) {
+        const diff = e.clientX - startX;
+        const newWidth = Math.max(50, startWidth + diff);
+        onColumnResize(column.field, newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   return (
@@ -167,6 +197,11 @@ const DraggableHeaderCell: React.FC<{
           </div>
         )}
       </div>
+      <div 
+        className="resize-handle"
+        onMouseDown={handleResizeStart}
+        title="Resize column"
+      />
     </th>
   );
 };
@@ -206,6 +241,16 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
         newColumns.splice(toIndex, 0, movedColumn);
         return newColumns;
       });
+    }
+  };
+
+  const handleColumnResize = (field: string, width: number) => {
+    if (setColumns) {
+      setColumns(prevColumns =>
+        prevColumns.map(col =>
+          col.field === field ? { ...col, width } : col
+        )
+      );
     }
   };
 
@@ -399,6 +444,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                 setThreeDotsMenuPosition={setThreeDotsMenuPosition}
                 setThreeDotsMenuField={setThreeDotsMenuField}
                 handleColumnRightClick={handleColumnRightClick}
+                onColumnResize={handleColumnResize}
               />
             );
           })}

@@ -188,17 +188,35 @@
 }
 
 .grid-header-cell {
-  background: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  position: relative;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
   border-right: 1px solid #dee2e6;
-  padding: 8px 12px;
+  font-weight: 600;
   text-align: left;
-  font-weight: 500;
-  position: sticky;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.resize-handle {
+  position: absolute;
   top: 0;
+  right: -2px;
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  border-right: 2px solid transparent;
+  transition: border-color 0.2s ease;
   z-index: 10;
-  font-size: 13px;
-  height: 40px;
+}
+
+.resize-handle:hover {
+  border-right-color: #007bff;
+}
+
+.grid-header-cell:hover .resize-handle {
+  border-right-color: #007bff;
 }
 
 .header-content {
@@ -1097,7 +1115,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
+padding: 16px;
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #dee2e6;
