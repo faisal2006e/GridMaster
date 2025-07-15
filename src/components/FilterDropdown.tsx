@@ -39,6 +39,20 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
       ];
     }
     
+    if (dataType === 'date' || dataType === 'time' || dataType === 'datetime') {
+      return [
+        { value: 'equals', label: 'Equals' },
+        { value: 'notEquals', label: 'Does not equal' },
+        { value: 'greaterThan', label: 'After' },
+        { value: 'greaterThanOrEqual', label: 'On or after' },
+        { value: 'lessThan', label: 'Before' },
+        { value: 'lessThanOrEqual', label: 'On or before' },
+        { value: 'between', label: 'Between' },
+        { value: 'blank', label: 'Blank' },
+        { value: 'notBlank', label: 'Not blank' }
+      ];
+    }
+    
     // Default string operators
     return [
       { value: 'contains', label: 'Contains' },
@@ -156,10 +170,20 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 </select>
                 
                 <input
-                  type="text"
+                  type={
+                    column.dataType === 'date' ? 'date' :
+                    column.dataType === 'time' ? 'time' :
+                    column.dataType === 'datetime' ? 'datetime-local' :
+                    'text'
+                  }
                   value={condition.value}
                   onChange={(e) => updateCondition(condition.id, 'value', e.target.value)}
-                  placeholder="Enter filter value..."
+                  placeholder={
+                    column.dataType === 'date' ? 'Select date...' :
+                    column.dataType === 'time' ? 'Select time...' :
+                    column.dataType === 'datetime' ? 'Select date and time...' :
+                    'Enter filter value...'
+                  }
                   className="filter-value-input"
                 />
                 

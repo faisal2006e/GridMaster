@@ -87,6 +87,82 @@ export const Grid: React.FC<GridProps> = ({
               case 'lessThanOrEqual':
                 return numValue <= numFilterValue;
               default:
+                return false;
+            }
+          }
+          
+          // Handle date, time, and datetime operators
+          if (column?.dataType === 'date' || column?.dataType === 'time' || column?.dataType === 'datetime') {
+            const dateValue = new Date(originalValue);
+            const filterDateValue = new Date(filterValue);
+            
+            if (isNaN(dateValue.getTime()) || isNaN(filterDateValue.getTime())) {
+              return false;
+            }
+            
+            switch (condition.operator) {
+              case 'equals':
+                return dateValue.getTime() === filterDateValue.getTime();
+              case 'notEquals':
+                return dateValue.getTime() !== filterDateValue.getTime();
+              case 'greaterThan':
+                return dateValue.getTime() > filterDateValue.getTime();
+              case 'greaterThanOrEqual':
+                return dateValue.getTime() >= filterDateValue.getTime();
+              case 'lessThan':
+                return dateValue.getTime() < filterDateValue.getTime();
+              case 'lessThanOrEqual':
+                return dateValue.getTime() <= filterDateValue.getTime();
+              default:
+                return false;
+            }
+          }
+          
+          // Handle boolean operators  
+          if (column?.dataType === 'boolean') {
+            const boolValue = Boolean(originalValue);
+            const filterBoolValue = filterValue.toLowerCase() === 'true';
+            
+            switch (condition.operator) {
+              case 'equals':
+                return boolValue === filterBoolValue;
+              case 'notEquals':
+                return boolValue !== filterBoolValue;
+              default:
+                return false;
+            }
+          }
+          
+          // Handle string operators (default)
+          switch (condition.operator) {
+            case 'contains':
+              return cellValue.includes(filterValue.toLowerCase());
+            case 'notContains':
+              return !cellValue.includes(filterValue.toLowerCase());
+            case 'equals':
+              return cellValue === filterValue.toLowerCase();
+            case 'notEquals':
+              return cellValue !== filterValue.toLowerCase();
+            case 'startsWith':
+              return cellValue.startsWith(filterValue.toLowerCase());
+            case 'endsWith':
+              return cellValue.endsWith(filterValue.toLowerCase());
+            case 'like':
+              const likeRegex = new RegExp(filterValue.toLowerCase().replace(/\*/g, '.*'), 'i');
+              return likeRegex.test(cellValue);
+            case 'notLike':
+              const notLikeRegex = new RegExp(filterValue.toLowerCase().replace(/\*/g, '.*'), 'i');
+              return !notLikeRegex.test(cellValue);
+            default:
+              return false;
+          }
+              case 'greaterThanOrEqual':
+                return numValue >= numFilterValue;
+              case 'lessThan':
+                return numValue < numFilterValue;
+              case 'lessThanOrEqual':
+                return numValue <= numFilterValue;
+              default:
                 return numValue === numFilterValue;
             }
           }

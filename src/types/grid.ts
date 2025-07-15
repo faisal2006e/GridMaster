@@ -8,7 +8,7 @@ export interface Column {
   editable?: boolean;
   cellRenderer?: (value: any) => string | React.ReactNode;
   visible?: boolean;
-  dataType?: 'string' | 'number' | 'date' | 'boolean';
+  dataType?: 'string' | 'number' | 'date' | 'time' | 'datetime' | 'boolean';
 }
 
 export interface GridProps {

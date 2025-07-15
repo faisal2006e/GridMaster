@@ -3,6 +3,11 @@ import { Column, SortConfig, FilterConfig, FilterOperator } from '../types/grid'
 import { FilterDropdown } from './FilterDropdown';
 import '@fortawesome/fontawesome-free/css/all.css';
 
+const getSortIcon = (field: string, sortConfig: SortConfig | null) => {
+  if (sortConfig?.field !== field) return <i className="fas fa-sort"></i>;
+  return sortConfig.direction === 'asc' ? <i className="fas fa-sort-up"></i> : <i className="fas fa-sort-down"></i>;
+};
+
 interface GridHeaderProps {
   columns: Column[];
   sortConfig: SortConfig | null;
