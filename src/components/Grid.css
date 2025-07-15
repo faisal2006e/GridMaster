@@ -81,6 +81,22 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+.drag-area-clear-all {
+  padding: 4px 8px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 8px;
+  transition: background-color 0.15s ease;
+}
+
+.drag-area-clear-all:hover {
+  background: #5a6268;
+}
+
 .grid-container {
   position: relative;
 }

@@ -159,36 +159,6 @@ export const Grid: React.FC<GridProps> = ({
 
   const totalPages = Math.ceil(sortedData.length / pageSize);
 
-  // GroupByRow component
-  const GroupByRow = () => {
-    if (groupByColumns.length === 0) return null;
-
-    return (
-      <div className="group-by-row">
-        <span className="group-by-label">Grouped by:</span>
-        {groupByColumns.map(col => (
-          <div key={col.field} className="group-by-tag">
-            <span>{col.headerName}</span>
-            <button 
-              className="group-by-remove"
-              onClick={() => handleRemoveGroupBy(col.field)}
-              title={`Remove ${col.headerName} grouping`}
-            >
-              ×
-            </button>
-          </div>
-        ))}
-        <button 
-          className="group-by-clear-all"
-          onClick={() => setGroupByColumns([])}
-          title="Clear all grouping"
-        >
-          Clear All
-        </button>
-      </div>
-    );
-  };
-
   return (
     <div 
       className="grid-container"
@@ -225,7 +195,6 @@ export const Grid: React.FC<GridProps> = ({
         }
       }}
     >
-      <GroupByRow />
       <div className="grid-wrapper">
         <div 
           className="grid-drag-area"
@@ -275,6 +244,13 @@ export const Grid: React.FC<GridProps> = ({
                   </button>
                 </div>
               ))}
+              <button 
+                className="drag-area-clear-all"
+                onClick={() => setGroupByColumns([])}
+                title="Clear all grouping"
+              >
+                Clear All
+              </button>
             </div>
           )}
         </div>
