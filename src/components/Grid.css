@@ -700,17 +700,14 @@
   overflow: hidden;
 }
 
-.filter-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
+.filter-dropdown-portal {
   background: white;
   border: 1px solid #ddd;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  width: 220px;
-  z-index: 1001;
-  margin-top: 2px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  width: 320px;
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .filter-dropdown-content {

@@ -115,6 +115,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   const [columnMenuPosition, setColumnMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [threeDotsMenuField, setThreeDotsMenuField] = useState<string | null>(null);
   const [threeDotsMenuPosition, setThreeDotsMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const [filterDropdownPosition, setFilterDropdownPosition] = useState<{ x: number; y: number } | null>(null);
 
   const getSortIcon = (field: string) => {
     if (sortConfig?.field !== field) return <i className="fas fa-sort"></i>;
@@ -307,63 +308,66 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     <>
       <thead>
         <tr>
-          {visibleColumns.map((column, index) => (
-            <DraggableHeaderCell
-              key={column.field}
-              column={column}
-              index={index}
-              moveColumn={moveColumn}
-            >
-              <span 
-                className={`header-title ${column.sortable ? 'sortable' : ''}`}
-                onClick={() => column.sortable && onSort(column.field)}
-                onContextMenu={(e) => handleColumnRightClick(e, column.field)}
+          {visibleColumns.map((column, index) => {
+            const isFilterActive = filterConfig[column.field]?.conditions?.some(c => c.value);
+            return (
+              <DraggableHeaderCell
+                key={column.field}
+                column={column}
+                index={index}
+                moveColumn={moveColumn}
               >
-                {column.headerName}
-                {column.sortable && (
-                  <span className="sort-icon">{getSortIcon(column.field)}</span>
-                )}
-              </span>
-
-              {column.filterable && (
-                <div className="filter-controls">
-                  <button
-                    className={`filter-button ${filterConfig[column.field]?.conditions?.some(c => c.value) ? 'active' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveFilterDropdown(activeFilterDropdown === column.field ? null : column.field);
-                    }}
-                    title="Filter"
-                  >
-                    <i className="fas fa-filter"></i>
-                  </button>
-                  <button
-                    className="filter-menu-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setThreeDotsMenuPosition({
-                        x: rect.left,
-                        y: rect.bottom + 2
-                      });
-                      setThreeDotsMenuField(column.field);
-                    }}
-                    title="Column options"
-                  >
-                    <i className="fas fa-ellipsis-v"></i>
-                  </button>
-                  {activeFilterDropdown === column.field && (
-                    <FilterDropdown
-                      field={column.field}
-                      filterConfig={filterConfig}
-                      onFilterChange={onFilter}
-                      onClose={() => setActiveFilterDropdown(null)}
-                    />
+                <span
+                  className={`header-title ${column.sortable ? 'sortable' : ''}`}
+                  onClick={() => column.sortable && onSort(column.field)}
+                  onContextMenu={(e) => handleColumnRightClick(e, column.field)}
+                >
+                  {column.headerName}
+                  {column.sortable && (
+                    <span className="sort-icon">{getSortIcon(column.field)}</span>
                   )}
-                </div>
-              )}
-            </DraggableHeaderCell>
-          ))}
+                </span>
+
+                {column.filterable && (
+                  <div className="filter-controls">
+                    <button
+                      className={`filter-button ${isFilterActive ? 'active' : ''}`}
+                      onClick={(e) => {
+                        if (activeFilterDropdown === column.field) {
+                          setActiveFilterDropdown(null);
+                        } else {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setFilterDropdownPosition({
+                            x: rect.left,
+                            y: rect.bottom + 5
+                          });
+                          setActiveFilterDropdown(column.field);
+                        }
+                      }}
+                      title="Filter"
+                    >
+                      <i className="fas fa-filter"></i>
+                    </button>
+                    <button
+                      className="filter-menu-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setThreeDotsMenuPosition({
+                          x: rect.left,
+                          y: rect.bottom + 2
+                        });
+                        setThreeDotsMenuField(column.field);
+                      }}
+                      title="Column options"
+                    >
+                      <i className="fas fa-ellipsis-v"></i>
+                    </button>
+                  </div>
+                )}
+              </DraggableHeaderCell>
+            );
+          })}
         </tr>
       </thead>
 
@@ -430,9 +434,15 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
               <span>Clear Sort</span>
             </div>
             <div className="column-menu-divider"></div>
-            <div className="column-menu-item" onClick={() => {
-              setActiveFilterDropdown(threeDotsMenuField);
-              handleThreeDotsMenuClose();
+            <div className="column-menu-item" onClick={(e) => {
+              if (threeDotsMenuPosition) {
+                setFilterDropdownPosition({
+                  x: threeDotsMenuPosition.x,
+                  y: threeDotsMenuPosition.y + 30
+                });
+                setActiveFilterDropdown(threeDotsMenuField);
+                handleThreeDotsMenuClose();
+              }
             }}>
               <span className="column-menu-icon"><i className="fas fa-filter"></i></span>
               <span>Filter</span>
@@ -500,6 +510,16 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {activeFilterDropdown && (
+        <FilterDropdown
+          field={activeFilterDropdown}
+          filterConfig={filterConfig}
+          onFilterChange={onFilter}
+          onClose={() => setActiveFilterDropdown(null)}
+          position={filterDropdownPosition}
+        />
       )}
     </>
   );

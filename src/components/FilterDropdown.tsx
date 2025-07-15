@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { FilterOperator, FilterConfig, FilterCondition, FilterLogic } from '../types/grid';
 
 interface FilterDropdownProps {
@@ -7,13 +8,15 @@ interface FilterDropdownProps {
   filterConfig: FilterConfig;
   onFilterChange: (field: string, conditions: FilterCondition[], logic: FilterLogic) => void;
   onClose: () => void;
+  position: { x: number; y: number };
 }
 
 export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   field,
   filterConfig,
   onFilterChange,
-  onClose
+  onClose,
+  position
 }) => {
   const currentFilter = filterConfig[field];
   const [conditions, setConditions] = useState<FilterCondition[]>(
@@ -78,8 +81,17 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
   const hasMultipleConditions = conditions.length > 1;
 
-  return (
-    <div ref={dropdownRef} className="filter-dropdown">
+  const dropdownContent = (
+    <div 
+      ref={dropdownRef} 
+      className="filter-dropdown-portal"
+      style={{
+        position: 'fixed',
+        left: position.x,
+        top: position.y,
+        zIndex: 1002
+      }}
+    >
       <div className="filter-dropdown-content">
         {hasMultipleConditions && (
           <div className="filter-logic-section">
@@ -153,4 +165,6 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(dropdownContent, document.body);
 };
