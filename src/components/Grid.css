@@ -172,6 +172,54 @@
   padding: 8px;
 }
 
+/* Drag and Drop Styles */
+.grid-header-cell {
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.grid-header-cell:active {
+  cursor: grabbing;
+}
+
+.grid-header-cell.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+.grid-header-cell.drag-over {
+  background-color: #e3f2fd;
+  border-left: 3px solid #007bff;
+}
+
+.drag-handle {
+  color: #999;
+  font-size: 12px;
+  cursor: grab;
+  margin-right: 6px;
+  display: flex;
+  align-items: center;
+  writing-mode: vertical-lr;
+  line-height: 8px;
+  user-select: none;
+}
+
+.drag-handle:hover {
+  color: #007bff;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  gap: 4px;
+}
+
 .column-chooser-cell {
   width: 40px;
   padding: 8px;

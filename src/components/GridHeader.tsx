@@ -34,6 +34,8 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   const [columnMenuPosition, setColumnMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [threeDotsMenuField, setThreeDotsMenuField] = useState<string | null>(null);
   const [threeDotsMenuPosition, setThreeDotsMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const [draggedColumn, setDraggedColumn] = useState<string | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
 
   const getSortIcon = (field: string) => {
     if (sortConfig?.field !== field) return '↑↓';
@@ -223,6 +225,61 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     handleThreeDotsMenuClose();
   };
 
+  const handleDragStart = (e: React.DragEvent, field: string) => {
+    setDraggedColumn(field);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', field);
+    
+    // Add a visual indicator
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.5';
+    }
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    setDraggedColumn(null);
+    setDragOverColumn(null);
+    
+    // Reset visual indicator
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '1';
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent, field: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverColumn(field);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverColumn(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetField: string) => {
+    e.preventDefault();
+    const draggedField = e.dataTransfer.getData('text/plain');
+    
+    if (draggedField === targetField || !setColumns) return;
+
+    // Reorder columns
+    setColumns(prevColumns => {
+      const draggedIndex = prevColumns.findIndex(col => col.field === draggedField);
+      const targetIndex = prevColumns.findIndex(col => col.field === targetField);
+      
+      if (draggedIndex === -1 || targetIndex === -1) return prevColumns;
+      
+      const newColumns = [...prevColumns];
+      const [draggedColumn] = newColumns.splice(draggedIndex, 1);
+      newColumns.splice(targetIndex, 0, draggedColumn);
+      
+      return newColumns;
+    });
+    
+    setDraggedColumn(null);
+    setDragOverColumn(null);
+  };
+
   return (
     <thead>
       <tr>
@@ -230,10 +287,17 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
           <th 
             key={column.field} 
             style={{ width: column.width }}
-            className="grid-header-cell"
+            className={`grid-header-cell ${dragOverColumn === column.field ? 'drag-over' : ''} ${draggedColumn === column.field ? 'dragging' : ''}`}
             onContextMenu={(e) => handleColumnRightClick(e, column.field)}
+            draggable={true}
+            onDragStart={(e) => handleDragStart(e, column.field)}
+            onDragEnd={handleDragEnd}
+            onDragOver={(e) => handleDragOver(e, column.field)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, column.field)}
           >
             <div className="header-content">
+              <span className="drag-handle" title="Drag to reorder column">⋮⋮</span>
               <span 
                 className={`header-title ${column.sortable ? 'sortable' : ''}`}
                 onClick={() => column.sortable && onSort(column.field)}
