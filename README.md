@@ -18,7 +18,9 @@
 
 ![Grid Library Demo](https://github.com/faisal2006e/GridMaster/blob/main/Screenshots/2.PNG)
 
-./ScreenShots/3.png
-./ScreenShots/ColumnChosser.png
-./ScreenShots/ColumnChosser2.png
-./ScreenShots/Grouping.png
+![Grid Library Demo](https://github.com/faisal2006e/GridMaster/blob/main/Screenshots/3.PNG)
+
+![Grid Library Demo](https://github.com/faisal2006e/GridMaster/blob/main/Screenshots/ColumnChosser.png)
+![Grid Library Demo](https://github.com/faisal2006e/GridMaster/blob/main/Screenshots/ColumnChosser2.png)
+![Grid Library Demo](https://github.com/faisal2006e/GridMaster/blob/main/Screenshots/Grouping.png)
+
