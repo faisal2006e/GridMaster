@@ -11,6 +11,7 @@ interface GridHeaderProps {
   onFilter: (field: string, value: string, operator: FilterOperator) => void;
   onColumnChooserOpen?: () => void;
   onColumnVisibilityChange?: (field: string, visible: boolean) => void;
+  setSortConfig?: (config: SortConfig | null) => void;
   showColumnChooser?: boolean;
 }
 
@@ -21,10 +22,14 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
   onSort,
   onFilter,
   onColumnChooserOpen,
+  onColumnVisibilityChange,
+  setSortConfig,
   showColumnChooser = false
 }) => {
   const [activeFilterDropdown, setActiveFilterDropdown] = useState<string | null>(null);
   const [showColumnDropdown, setShowColumnDropdown] = useState(false);
+  const [columnMenuField, setColumnMenuField] = useState<string | null>(null);
+  const [columnMenuPosition, setColumnMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
   const getSortIcon = (field: string) => {
     if (sortConfig?.field !== field) return '↑↓';
@@ -38,6 +43,34 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
     if (column && onColumnVisibilityChange) {
       onColumnVisibilityChange(field, !(column.visible !== false));
     }
+  };
+
+  const handleColumnRightClick = (e: React.MouseEvent, field: string) => {
+    e.preventDefault();
+    setColumnMenuField(field);
+    setColumnMenuPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleColumnMenuClose = () => {
+    setColumnMenuField(null);
+    setColumnMenuPosition(null);
+  };
+
+  const handleSortAscending = () => {
+    if (columnMenuField) {
+      onSort(columnMenuField);
+      if (setSortConfig) {
+        setSortConfig({ field: columnMenuField, direction: 'asc' });
+      }
+    }
+    handleColumnMenuClose();
+  };
+
+  const handleClearSort = () => {
+    if (setSortConfig) {
+      setSortConfig(null);
+    }
+    handleColumnMenuClose();
   };
 
   return (
@@ -86,6 +119,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
             key={column.field} 
             style={{ width: column.width }}
             className="grid-header-cell"
+            onContextMenu={(e) => handleColumnRightClick(e, column.field)}
           >
             <div className="header-content">
               <div className="header-title-row">
@@ -125,6 +159,66 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
           </th>
         ))}
       </tr>
+      
+      {/* Column Context Menu */}
+      {columnMenuField && columnMenuPosition && (
+        <div className="column-context-menu-overlay" onClick={handleColumnMenuClose}>
+          <div 
+            className="column-context-menu"
+            style={{ 
+              left: columnMenuPosition.x, 
+              top: columnMenuPosition.y 
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="column-menu-item" onClick={handleSortAscending}>
+              <span className="column-menu-icon">↑</span>
+              <span>Sort Ascending</span>
+            </div>
+            <div className="column-menu-item" onClick={handleClearSort}>
+              <span className="column-menu-icon">◇</span>
+              <span>Clear Sort</span>
+            </div>
+            <div className="column-menu-divider"></div>
+            <div className="column-menu-item" onClick={() => {
+              setShowColumnDropdown(true);
+              handleColumnMenuClose();
+            }}>
+              <span className="column-menu-icon">☰</span>
+              <span>Choose Columns</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Column Chooser Dropdown */}
+      {showColumnDropdown && (
+        <div className="column-chooser-overlay" onClick={() => setShowColumnDropdown(false)}>
+          <div className="column-chooser-dropdown-standalone" onClick={(e) => e.stopPropagation()}>
+            <div className="column-chooser-dropdown-header">
+              <span>Choose Columns</span>
+              <button 
+                className="dropdown-close-button"
+                onClick={() => setShowColumnDropdown(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="column-chooser-dropdown-list">
+              {columns.map(column => (
+                <label key={column.field} className="column-dropdown-item">
+                  <input
+                    type="checkbox"
+                    checked={column.visible !== false}
+                    onChange={() => handleColumnVisibilityToggle(column.field)}
+                  />
+                  <span>{column.headerName}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </thead>
   );
 };
