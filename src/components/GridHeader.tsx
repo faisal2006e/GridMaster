@@ -327,7 +327,17 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
               {column.filterable && (
                 <div className="filter-controls">
                   <button
-                    className={`filter-menu-button ${filterConfig[column.field]?.value ? 'active' : ''}`}
+                    className={`filter-button ${filterConfig[column.field]?.value ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveFilterDropdown(activeFilterDropdown === column.field ? null : column.field);
+                    }}
+                    title="Filter"
+                  >
+                    🔍
+                  </button>
+                  <button
+                    className="filter-menu-button"
                     onClick={(e) => handleThreeDotsClick(e, column.field)}
                     title="Column Options"
                   >
