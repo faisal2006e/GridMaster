@@ -334,7 +334,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
                     }}
                     title="Filter"
                   >
-                    ⚙️
+                    ⌖
                   </button>
                   <button
                     className="filter-menu-button"
@@ -425,7 +425,7 @@ export const GridHeader: React.FC<GridHeaderProps> = ({
               setActiveFilterDropdown(threeDotsMenuField);
               handleThreeDotsMenuClose();
             }}>
-              <span className="column-menu-icon">⚙️</span>
+              <span className="column-menu-icon">⌖</span>
               <span>Filter</span>
             </div>
             <div className="column-menu-divider"></div>
